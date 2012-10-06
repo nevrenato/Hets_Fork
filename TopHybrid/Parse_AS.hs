@@ -43,11 +43,16 @@ itemParser :: AParser st TH_BASIC_ITEM
 itemParser = 
         do 
         asKey "modality"
-        return $ Simple_mod_decl [] nullRange
+        ms <- ids
+        return $ Simple_mod_decl ms nullRange
         <|>
         do 
         asKey "nominal"
-        return $ Simple_nom_decl [] nullRange
+        ns <- ids
+        return $ Simple_nom_decl ns nullRange
+
+ids :: AParser st [SIMPLE_ID]
+ids = sepBy simpleId anSemiOrComma 
 
 callParser :: Maybe (AParser st a) -> AParser st a
 callParser = fromMaybe (fail "no parser for this logic")
