@@ -65,5 +65,3 @@ instance GetRange Form_Wrapper where
 instance GetRange Spec_Wrapper where
         getRange (Spec_Wrapper s) = getRange s
         rangeSpan (Spec_Wrapper s) = rangeSpan s
-
-

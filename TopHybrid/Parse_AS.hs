@@ -54,6 +54,20 @@ itemParser =
 ids :: AParser st [SIMPLE_ID]
 ids = sepBy simpleId anSemiOrComma 
 
+formParser :: (TermParser f) => AParser st (TH_FORMULA f) 
+formParser = 
+        do
+        asKey "@"
+        n <- simpleId
+        f <- termParser False 
+        return $ At n f nullRange 
+        <|>
+        do 
+        f <- termParser False
+        return $ UnderLogic f 
+
+
 callParser :: Maybe (AParser st a) -> AParser st a
 callParser = fromMaybe (fail "no parser for this logic")
 
+instance TermParser f => TermParser (TH_FORMULA f) where
