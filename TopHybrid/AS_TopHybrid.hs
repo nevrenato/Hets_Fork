@@ -20,10 +20,7 @@ import ATerm.Lib
 -- DrIFT command
 {-! global: GetRange !-}
 
-
-data TH_BSPEC s = Bspec TH_BASIC_ITEM 
-                | ExtSpec s
-                  deriving Show 
+data TH_BSPEC s = Bspec [TH_BASIC_ITEM] s deriving Show
 
 data TH_BASIC_ITEM = Simple_mod_decl [MODALITY] Range
                    | Simple_nom_decl [NOMINAL] Range 
@@ -41,6 +38,8 @@ data TH_FORMULA f = At NOMINAL (TH_FORMULA f) Range
 
 data Form_Wrapper = forall f. (Show f, GetRange f, ShATermConvertible f) 
                                 => Form_Wrapper (TH_FORMULA f)
+
+-- this spec will need to have a list of TH_BSPEC s
 data Spec_Wrapper = forall s. (Show s, GetRange s, ShATermConvertible s) 
                                 => Spec_Wrapper (TH_BSPEC s)
 
@@ -74,8 +73,7 @@ instance GetRange Spec_Wrapper where
 instance GetRange s => GetRange (TH_BSPEC s) where
   getRange = const nullRange
   rangeSpan x = case x of
-    Bspec a -> joinRanges [rangeSpan a]
-    ExtSpec a -> joinRanges [rangeSpan a]
+    Bspec a b -> joinRanges [rangeSpan a, rangeSpan b]
 
 instance GetRange TH_BASIC_ITEM where
   getRange x = case x of

@@ -16,7 +16,9 @@ module TopHybrid.Parse_AS where
 
 import Common.AnnoState
 import Common.Token
+import Common.Id
 import Data.Maybe
+import Text.ParserCombinators.Parsec
 import Logic.Logic
 
 import TopHybrid.AS_TopHybrid
@@ -33,8 +35,19 @@ thBasic =
 specParser :: AnyLogic -> AParser st Spec_Wrapper
 specParser (Logic l) = 
         do
+        i <- many itemParser
         s <- callParser $ parse_basic_spec l
-        return $ Spec_Wrapper $ ExtSpec s 
+        return $ Spec_Wrapper $ Bspec i  s 
+
+itemParser :: AParser st TH_BASIC_ITEM
+itemParser = 
+        do 
+        asKey "modality"
+        return $ Simple_mod_decl [] nullRange
+        <|>
+        do 
+        asKey "nominal"
+        return $ Simple_nom_decl [] nullRange
 
 callParser :: Maybe (AParser st a) -> AParser st a
 callParser = fromMaybe (fail "no parser for this logic")

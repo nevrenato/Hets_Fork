@@ -62,21 +62,17 @@ instance Typeable1 TH_FORMULA where
 
 instance ShATermConvertible s => ShATermConvertible (TH_BSPEC s) where
   toShATermAux att0 xv = case xv of
-    Bspec a -> do
+    Bspec a b -> do
       (att1, a') <- toShATerm' att0 a
-      return $ addATerm (ShAAppl "Bspec" [a'] []) att1
-    ExtSpec a -> do
-      (att1, a') <- toShATerm' att0 a
-      return $ addATerm (ShAAppl "ExtSpec" [a'] []) att1
+      (att2, b') <- toShATerm' att1 b
+      return $ addATerm (ShAAppl "Bspec" [a', b'] []) att2
   fromShATermAux ix att0 = case getShATerm ix att0 of
-    ShAAppl "Bspec" [a] _ ->
+    ShAAppl "Bspec" [a, b] _ ->
       case fromShATerm' a att0 of
       { (att1, a') ->
-      (att1, Bspec a') }
-    ShAAppl "ExtSpec" [a] _ ->
-      case fromShATerm' a att0 of
-      { (att1, a') ->
-      (att1, ExtSpec a') }
+      case fromShATerm' b att1 of
+      { (att2, b') ->
+      (att2, Bspec a' b') }}
     u -> fromShATermError "TH_BSPEC" u
 
 instance ShATermConvertible TH_BASIC_ITEM where

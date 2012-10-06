@@ -20,10 +20,7 @@ import ATerm.Lib
 -- DrIFT command
 {-! global: GetRange !-}
 
-
-data TH_BSPEC s = Bspec TH_BASIC_ITEM 
-                | ExtSpec s
-                  deriving Show 
+data TH_BSPEC s = Bspec [TH_BASIC_ITEM] s deriving Show
 
 data TH_BASIC_ITEM = Simple_mod_decl [MODALITY] Range
                    | Simple_nom_decl [NOMINAL] Range 
