@@ -267,6 +267,10 @@ class (Language lid, Category sign morphism, Ord sentence,
     => Sentences lid sentence sign morphism symbol
         | lid -> sentence sign morphism symbol
       where
+      -- Parser of sentence (Added for generic Hybrid logic)
+      parse_basic_sen :: lid -> Maybe (AParser st sentence)
+      parse_basic_sen _ = Nothing 
+
       -- | sentence translation along a signature morphism
       map_sen :: lid -> morphism -> sentence -> Result sentence
       map_sen l _ _ = statFail l "map_sen"

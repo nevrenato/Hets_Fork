@@ -36,11 +36,9 @@ data TH_FORMULA f = At NOMINAL (TH_FORMULA f) Range
                   | Here NOMINAL Range  
                     deriving (Show, Eq, Ord)
 
-data Form_Wrapper = forall f. (Show f, GetRange f, ShATermConvertible f,
-                                TermParser f) 
+data Form_Wrapper = forall f. (Show f, GetRange f, ShATermConvertible f) 
                                 => Form_Wrapper (TH_FORMULA f)
 
--- this spec will need to have a list of TH_BSPEC s
 data Spec_Wrapper = forall s. (Show s, GetRange s, ShATermConvertible s) 
                                 => Spec_Wrapper (TH_BSPEC s)
 

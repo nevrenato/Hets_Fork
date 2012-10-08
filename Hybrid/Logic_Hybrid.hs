@@ -27,7 +27,7 @@ import CASL.SymbolParser
 import CASL.Taxonomy
 import CASL.ToDoc
 import CASL.Logic_CASL ()
-
+import CASL.Formula (formula)
 data Hybrid = Hybrid deriving Show
 
 instance Language Hybrid where
@@ -61,6 +61,7 @@ map_H_FORMULA mor (Bind n f ps) = Bind n (mapSen map_H_FORMULA mor f) ps
 map_H_FORMULA _ (Here n ps) = Here n ps
 
 instance Sentences Hybrid HybridFORMULA HSign HybridMor Symbol where
+      parse_basic_sen Hybrid = Just $ formula hybrid_reserved_words 
       map_sen Hybrid h = return . mapSen map_H_FORMULA h
       sym_of Hybrid = symOf
       symmap_of Hybrid = morphismToSymbMap

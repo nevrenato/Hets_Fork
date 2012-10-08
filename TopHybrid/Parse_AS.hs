@@ -33,12 +33,12 @@ thBasic =
         return p 
 
 specParser :: AnyLogic -> AParser st Spec_Wrapper
-specParser (Logic l) = 
+specParser l'@(Logic l) = 
         do
+        formParser l'
         i <- many itemParser
         s <- callParser $ parse_basic_spec l
-        _ <- formParser 
-        return $ Spec_Wrapper $ Bspec i  s 
+        return $ Spec_Wrapper $ Bspec i s 
 
 itemParser :: AParser st TH_BASIC_ITEM
 itemParser = 
@@ -54,18 +54,18 @@ itemParser =
 
 ids :: AParser st [SIMPLE_ID]
 ids = sepBy simpleId anSemiOrComma 
-
-formParser :: (TermParser f) => AParser st (TH_FORMULA f) 
-formParser = 
-        do
-        asKey "@"
-        n <- simpleId
-        f <- formParser 
-        return $ At n f nullRange 
-        <|>
-        do 
-        f <- termParser False
-        return $ UnderLogic f 
+ 
+formParser :: AnyLogic -> AParser st Form_Wrapper 
+formParser l'@(Logic l) = 
+--        do
+--        asKey "@"
+--        n <- simpleId
+--        x <- formParser l' 
+--        return $ At n x nullRange 
+--        <|>
+          do 
+          x <- callParser $ parse_basic_sen l
+          return $ Form_Wrapper $ UnderLogic x 
 
 callParser :: Maybe (AParser st a) -> AParser st a
 callParser = fromMaybe (fail "no parser for this logic")
