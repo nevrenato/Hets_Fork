@@ -24,6 +24,15 @@ import Logic.Logic
 import TopHybrid.AS_TopHybrid
 import TopHybrid.UnderLogicList
 
+-- f :: forall lid sublogics
+--         basic_spec sentence symb_items symb_map_items
+--         sign morphism symbol raw_symbol proof_tree .
+--         Logic lid sublogics
+--          basic_spec sentence symb_items symb_map_items
+--          sign morphism symbol raw_symbol proof_tree =>
+--         AnyLogic -> lid 
+--f (Logic l) = l
+
 thBasic :: AParser st Spec_Wrapper
 thBasic =
         do
