@@ -37,6 +37,7 @@ specParser (Logic l) =
         do
         i <- many itemParser
         s <- callParser $ parse_basic_spec l
+        _ <- formParser 
         return $ Spec_Wrapper $ Bspec i  s 
 
 itemParser :: AParser st TH_BASIC_ITEM
@@ -59,15 +60,14 @@ formParser =
         do
         asKey "@"
         n <- simpleId
-        f <- termParser False 
+        f <- formParser 
         return $ At n f nullRange 
         <|>
         do 
         f <- termParser False
         return $ UnderLogic f 
 
-
 callParser :: Maybe (AParser st a) -> AParser st a
 callParser = fromMaybe (fail "no parser for this logic")
 
-instance TermParser f => TermParser (TH_FORMULA f) where
+instance TermParser (TH_FORMULA f) where
