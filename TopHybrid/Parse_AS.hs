@@ -24,15 +24,6 @@ import Logic.Logic
 import TopHybrid.AS_TopHybrid
 import TopHybrid.UnderLogicList
 
--- f :: forall lid sublogics
---         basic_spec sentence symb_items symb_map_items
---         sign morphism symbol raw_symbol proof_tree .
---         Logic lid sublogics
---          basic_spec sentence symb_items symb_map_items
---          sign morphism symbol raw_symbol proof_tree =>
---         AnyLogic -> lid 
---f (Logic l) = l
-
 thBasic :: AParser st Spec_Wrapper
 thBasic =
         do
@@ -44,7 +35,7 @@ thBasic =
 specParser :: AnyLogic -> AParser st Spec_Wrapper
 specParser l'@(Logic l) = 
         do
-        formParser l'
+        many $ formParser l'
         i <- many itemParser
         s <- callParser $ parse_basic_spec l
         return $ Spec_Wrapper $ Bspec i s 
@@ -66,17 +57,18 @@ ids = sepBy simpleId anSemiOrComma
  
 formParser :: AnyLogic -> AParser st Form_Wrapper 
 formParser l'@(Logic l) = 
---        do
---        asKey "@"
---        n <- simpleId
---        x <- formParser l' 
---        return $ At n x nullRange 
---        <|>
-          do 
-          x <- callParser $ parse_basic_sen l
-          return $ Form_Wrapper $ UnderLogic x 
+        do
+        asKey "@"
+        n <- simpleId
+        (Form_Wrapper f) <- formParser l' 
+        return $ Form_Wrapper $ At n f nullRange 
+        <|>
+        do 
+        x <- callParser $ parse_basic_sen l
+        return $ Form_Wrapper $ UnderLogic x 
+
 
 callParser :: Maybe (AParser st a) -> AParser st a
-callParser = fromMaybe (fail "no parser for this logic")
+callParser = fromMaybe (fail "Failed! No parser for this logic")
 
 instance TermParser (TH_FORMULA f) where

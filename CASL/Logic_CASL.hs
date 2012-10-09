@@ -50,7 +50,9 @@ import CASL.Qualify
 import CASL.Quantification
 import qualified CASL.OMDocImport as OMI
 import CASL.OMDocExport
-
+-- test
+import CASL.Formula (formula)
+--
 #ifdef UNI_PACKAGE
 import CASL.QuickCheck
 #endif
@@ -204,6 +206,9 @@ instance Lattice a => ProjectSublogicM (CASL_SL a) Symbol where
 -- CASL logic
 
 instance Sentences CASL CASLFORMULA CASLSign CASLMor Symbol where
+-- modified to be an underlogic
+      parse_basic_sen CASL = Just $ formula []
+---
       map_sen CASL m = return . mapSen (const id) m
       negation CASL = negateFormula
       sym_of CASL = symOf
