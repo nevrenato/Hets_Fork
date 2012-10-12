@@ -99,9 +99,9 @@ modality ks =
 instance TermParser H_FORMULA where
     termParser = aToTermParser hybridFormula
 
+-- Block the Rigid parts
 rigor :: AParser st RIGOR
-rigor = (asKey rigidS >> return Rigid)
-        <|> (asKey flexibleS >> return Flexible)
+rigor = (asKey flexibleS >> return Flexible)
 
 rigidSigItems :: AParser st H_SIG_ITEM
 rigidSigItems =
