@@ -35,10 +35,10 @@ thBasic =
 specParser :: AnyLogic -> AParser st Spec_Wrapper
 specParser l'@(Logic l) = 
         do
-        many $ formParser l'
         i <- many itemParser
         s <- callParser $ parse_basic_spec l
-        return $ Spec_Wrapper $ Bspec i s 
+        f <- many $ formParser l'
+        return $ Spec_Wrapper (Bspec i s) f
 
 itemParser :: AParser st TH_BASIC_ITEM
 itemParser = 

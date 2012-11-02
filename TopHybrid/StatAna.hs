@@ -11,4 +11,4 @@ Static analysis of hybrid logic with an
 arbitrary logic below.
 -}
 
-module TopHybrid.StatAna () where
+module TopHybrid.StatAna (THybridAnalysis ) where

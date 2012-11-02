@@ -29,8 +29,8 @@ data THybridSign s = THybridSign
   } deriving (Show, Eq, Ord) 
 
 
-emptyHybridSign :: Sign_Wrapper
-emptyHybridSign = Sign_Wrapper s
+emptyTHybridSign :: Sign_Wrapper
+emptyTHybridSign = Sign_Wrapper s
         where s = THybridSign [] [] ()
 
 isSubTHybridSign :: Sign_Wrapper -> Sign_Wrapper -> Bool
