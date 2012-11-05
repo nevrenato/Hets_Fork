@@ -22,6 +22,8 @@ import Common.ExtSign
 import Common.AS_Annotation
 import CASL.AS_Basic_CASL
 import CASL.Sign
+
 thAna :: (Spec_Wrapper, Sign Form_Wrapper Sign_Wrapper, GlobalAnnos) -> 
         Result (Spec_Wrapper, ExtSign (Sign Form_Wrapper Sign_Wrapper) Symbol, [Named Form_Wrapper])
-thAna (b, s, _)= error $ show s ++ ("\n")  ++(show b) 
+--thAna (b, s, _)= error $ ("Spitted info \n\n:"show s ++ ("\n\n")  ++(show b)
+thAna (b,s,_) = return (b, mkExtSign s, []) 
