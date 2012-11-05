@@ -33,7 +33,8 @@ data TH_FORMULA f = At NOMINAL (TH_FORMULA f) Range
                   | Box MODALITY (TH_FORMULA f) Range
                   | Dia MODALITY (TH_FORMULA f) Range
                   | UnderLogic f
-                  | Here NOMINAL Range  
+                  -- the f in the next constructor is stupid
+                  | Here NOMINAL f Range  
                     deriving (Show, Eq, Ord)
 
 data Form_Wrapper = forall f. (Show f, GetRange f, ShATermConvertible f) 

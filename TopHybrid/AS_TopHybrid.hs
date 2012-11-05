@@ -33,7 +33,8 @@ data TH_FORMULA f = At NOMINAL (TH_FORMULA f) Range
                   | Box MODALITY (TH_FORMULA f) Range
                   | Dia MODALITY (TH_FORMULA f) Range
                   | UnderLogic f
-                  | Here NOMINAL Range  
+                  -- the f in the next constructor is stupid
+                  | Here NOMINAL f Range  
                     deriving (Show, Eq, Ord)
 
 data Form_Wrapper = forall f. (Show f, GetRange f, ShATermConvertible f) 
@@ -86,10 +87,10 @@ instance GetRange f => GetRange (TH_FORMULA f) where
     Box _ _ p -> p
     Dia _ _ p -> p
     UnderLogic _ -> nullRange
-    Here _ p -> p
+    Here _ _ p -> p
   rangeSpan x = case x of
     At a b c -> joinRanges [rangeSpan a, rangeSpan b, rangeSpan c]
     Box a b c -> joinRanges [rangeSpan a, rangeSpan b, rangeSpan c]
     Dia a b c -> joinRanges [rangeSpan a, rangeSpan b, rangeSpan c]
     UnderLogic a -> joinRanges [rangeSpan a]
-    Here a b -> joinRanges [rangeSpan a, rangeSpan b]
+    Here a b c -> joinRanges [rangeSpan a, rangeSpan b, rangeSpan c]

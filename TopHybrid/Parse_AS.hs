@@ -35,9 +35,12 @@ thBasic =
 specParser :: AnyLogic -> AParser st Spec_Wrapper
 specParser l'@(Logic l) = 
         do
-        i <- many itemParser
+        asKey "Basic_Spec"
+        asKey "{"
         s <- callParser $ parse_basic_spec l
-        f <- many $ formParser l'
+        asKey "}"
+        i <- many itemParser 
+        f <- sepBy (formParser l') anSemiOrComma
         return $ Spec_Wrapper (Bspec i s) f
 
 itemParser :: AParser st TH_BASIC_ITEM
@@ -61,7 +64,12 @@ formParser l'@(Logic l) =
         asKey "@"
         n <- simpleId
         (Form_Wrapper f) <- formParser l' 
-        return $ Form_Wrapper $ At n f nullRange 
+        return $ Form_Wrapper $ At n f nullRange
+        <|>
+        do 
+        asKey "Here"
+        n <- simpleId
+        return $ Form_Wrapper $ Here n () nullRange 
         <|>
         do 
         x <- callParser $ parse_basic_sen l

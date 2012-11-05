@@ -21,7 +21,7 @@ import TopHybrid.TopHybridSign
 import TopHybrid.ATC_TopHybrid
 import TopHybrid.Parse_AS
 import TopHybrid.Print_AS ()
-
+import TopHybrid.StatAna
 import CASL.Sign
 import CASL.Morphism
 import CASL.AS_Basic_CASL
@@ -49,7 +49,7 @@ instance Sentences TopHybrid Form_Wrapper THSign THybridMor Symbol where
 
 instance StaticAnalysis TopHybrid Spec_Wrapper Form_Wrapper SYMB_ITEMS SYMB_MAP_ITEMS
           THSign THybridMor Symbol RawSymbol where 
-                basic_analysis TopHybrid = Nothing 
+                basic_analysis TopHybrid = Just thAna 
                 empty_signature TopHybrid = emptySign emptyTHybridSign
 
 instance Logic TopHybrid () Spec_Wrapper Form_Wrapper SYMB_ITEMS SYMB_MAP_ITEMS

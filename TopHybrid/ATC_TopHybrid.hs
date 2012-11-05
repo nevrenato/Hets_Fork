@@ -120,10 +120,11 @@ instance ShATermConvertible f => ShATermConvertible (TH_FORMULA f) where
     UnderLogic a -> do
       (att1, a') <- toShATerm' att0 a
       return $ addATerm (ShAAppl "UnderLogic" [a'] []) att1
-    Here a b -> do
+    Here a b c -> do
       (att1, a') <- toShATerm' att0 a
       (att2, b') <- toShATerm' att1 b
-      return $ addATerm (ShAAppl "Here" [a', b'] []) att2
+      (att3, c') <- toShATerm' att2 c
+      return $ addATerm (ShAAppl "Here" [a', b', c'] []) att3
   fromShATermAux ix att0 = case getShATerm ix att0 of
     ShAAppl "At" [a, b, c] _ ->
       case fromShATerm' a att0 of
@@ -153,12 +154,14 @@ instance ShATermConvertible f => ShATermConvertible (TH_FORMULA f) where
       case fromShATerm' a att0 of
       { (att1, a') ->
       (att1, UnderLogic a') }
-    ShAAppl "Here" [a, b] _ ->
+    ShAAppl "Here" [a, b, c] _ ->
       case fromShATerm' a att0 of
       { (att1, a') ->
       case fromShATerm' b att1 of
       { (att2, b') ->
-      (att2, Here a' b') }}
+      case fromShATerm' c att2 of
+      { (att3, c') ->
+      (att3, Here a' b' c') }}}
     u -> fromShATermError "TH_FORMULA" u
 
 instance ShATermConvertible s => ShATermConvertible (THybridSign s) where
