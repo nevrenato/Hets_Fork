@@ -33,6 +33,10 @@ data TH_FORMULA f = At NOMINAL (TH_FORMULA f) Range
                   | Box MODALITY (TH_FORMULA f) Range
                   | Dia MODALITY (TH_FORMULA f) Range
                   | UnderLogic f
+                  | Conjunction (TH_FORMULA f) (TH_FORMULA f)
+                  | Disjunction (TH_FORMULA f) (TH_FORMULA f)
+                  | Implication (TH_FORMULA f) (TH_FORMULA f)
+                  | BiImplication (TH_FORMULA f) (TH_FORMULA f) -- ??
                   -- the f in the next constructor is stupid
                   | Here NOMINAL f Range  
                     deriving (Show, Eq, Ord)
@@ -42,6 +46,11 @@ data Form_Wrapper = forall f. (Show f, GetRange f, ShATermConvertible f)
 
 data Spec_Wrapper = forall s. (Show s, GetRange s, ShATermConvertible s) 
                                 => Spec_Wrapper (TH_BSPEC s) [Form_Wrapper]
+
+data Mor = Mor 
+deriving instance Ord Mor
+deriving instance Eq Mor
+deriving instance Show Mor
 
 ----- Boring instances needed for a valid program, that DriFT cannot generate
 deriving instance Show Form_Wrapper

@@ -33,3 +33,5 @@ instance Pretty Sign_Wrapper where
         pretty _ = pretty ()
 instance Pretty Spec_Wrapper where
         pretty _ = pretty ()
+instance Pretty Mor where 
+        

@@ -30,24 +30,13 @@ data THybridSign s = THybridSign
 
 
 emptyTHybridSign :: Sign_Wrapper
-emptyTHybridSign = Sign_Wrapper s
-        where s = THybridSign [] [] ()
+emptyTHybridSign = Sign_Wrapper $ THybridSign [] [] ()
 
 isSubTHybridSign :: Sign_Wrapper -> Sign_Wrapper -> Bool
 isSubTHybridSign (Sign_Wrapper s) (Sign_Wrapper s') = False
-        
-
----- for testing ... to remove 
 
 
-
-
-
-
-
-
-
-
+       
 -- Boring instances needed for a valid progam, that DriFT cannot generate
 deriving instance Show Sign_Wrapper
 deriving instance Typeable Sign_Wrapper

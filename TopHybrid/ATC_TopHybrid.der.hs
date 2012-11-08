@@ -14,6 +14,7 @@ Automatic derivation of instances via DrIFT-rule Typeable, ShATermConvertible
 'TopHybrid.AS_TopHybrid.TH_BSPEC'
 'TopHybrid.AS_TopHybrid.TH_BASIC_ITEM'
 'TopHybrid.AS_TopHybrid.TH_FORMULA'
+'TopHybrid.AS_TopHybrid.Mor'
 'TopHybrid.TopHybridSign.THybridSign'
 -}
 
@@ -36,9 +37,11 @@ import TopHybrid.TopHybridSign
 {-! for TopHybrid.AS_TopHybrid.TH_BSPEC derive : Typeable !-}
 {-! for TopHybrid.AS_TopHybrid.TH_BASIC_ITEM derive : Typeable !-}
 {-! for TopHybrid.AS_TopHybrid.TH_FORMULA derive : Typeable !-}
+{-! for TopHybrid.AS_TopHybrid.Mor derive : Typeable !-}
 {-! for TopHybrid.TopHybridSign.THybridSign derive : Typeable !-}
 
 {-! for TopHybrid.AS_TopHybrid.TH_BSPEC derive : ShATermConvertible !-}
 {-! for TopHybrid.AS_TopHybrid.TH_BASIC_ITEM derive : ShATermConvertible !-}
 {-! for TopHybrid.AS_TopHybrid.TH_FORMULA derive : ShATermConvertible !-}
+{-! for TopHybrid.AS_TopHybrid.Mor derive : ShATermConvertible !-}
 {-! for TopHybrid.TopHybridSign.THybridSign derive : ShATermConvertible !-}

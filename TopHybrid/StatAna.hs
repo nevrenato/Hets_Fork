@@ -22,8 +22,21 @@ import Common.ExtSign
 import Common.AS_Annotation
 import CASL.AS_Basic_CASL
 import CASL.Sign
+import Common.Id
+import ATerm.Lib
 
-thAna :: (Spec_Wrapper, Sign Form_Wrapper Sign_Wrapper, GlobalAnnos) -> 
-        Result (Spec_Wrapper, ExtSign (Sign Form_Wrapper Sign_Wrapper) Symbol, [Named Form_Wrapper])
---thAna (b, s, _)= error $ ("Spitted info \n\n:"show s ++ ("\n\n")  ++(show b)
-thAna (b,s,_) = return (b, mkExtSign s, []) 
+thAna :: (Spec_Wrapper, Sign_Wrapper, GlobalAnnos) -> 
+        Result (Spec_Wrapper, ExtSign Sign_Wrapper Symbol, [Named Form_Wrapper])
+-- Debug purposes
+thAna (b, s, _) = error $ ("Spitted info : \n\n") 
+        ++ 
+        (show $ anaNomsMods b s)  
+        ++ 
+        ("\n\n")  
+        ++ 
+        (show b) 
+
+anaNomsMods :: Spec_Wrapper -> Sign_Wrapper -> Sign_Wrapper
+anaNomsMods (Spec_Wrapper (Bspec ds _) _) (Sign_Wrapper s) = Sign_Wrapper $ foldl f s ds
+        where   f x (Simple_mod_decl ms _) = x { modies = modies x ++ ms }
+                f x (Simple_nom_decl ns _) = x { nomies = nomies x ++ ns }   
