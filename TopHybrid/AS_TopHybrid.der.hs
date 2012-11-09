@@ -59,13 +59,13 @@ deriving instance Typeable Form_Wrapper
 deriving instance Typeable Spec_Wrapper
 
 instance Eq Form_Wrapper where
-       (==) = undefined 
+       (==) = error "I'm stupid" 
 instance Eq Spec_Wrapper where
-       (==) = undefined
+       (==) = error "I'm stupid"
 instance Ord Form_Wrapper where
-       compare = undefined
+       compare = error "I'm stupid"
 instance Ord Spec_Wrapper where
-        compare = undefined 
+        compare = error "I'm stupid"
 
 instance GetRange Form_Wrapper where
         getRange (Form_Wrapper f) = getRange f

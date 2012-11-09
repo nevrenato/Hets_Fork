@@ -28,14 +28,16 @@ import Control.Arrow
 import Data.List
 import Data.Maybe
 
+-- Note
+-- Later, it is needed to propagate the errors from anaNomsMods
+-- makeNamed :: String -> Sentence -> ...
+
 thAna :: (Spec_Wrapper, Sign_Wrapper, GlobalAnnos) -> 
         Result (Spec_Wrapper, ExtSign Sign_Wrapper Symbol, [Named Form_Wrapper])
 
-thAna (b, s, _) = hint (b, mkExtSign s', []) (deb s' b) nullRange
-        where s' = fromMaybe s $ maybeResult $ anaNomsMods b s
-
--- Note
--- Later, it is needed to propagate the errors from anaNomsMods
+thAna (b, s, _) = hint (b, mkExtSign s', fs) (deb s' b) nullRange
+        where   s' = fromMaybe s $ maybeResult $ anaNomsMods b s
+                fs = anaForms b s'
 
 -- | Need to check if the analyser does his work well
 deb s b = ("Debug : \n\n") ++ 
@@ -54,9 +56,19 @@ anaNomsMods b (Sign_Wrapper s) =
         s' = s { modies = m, nomies = n }   
         msg = "Repeated nominals and/or modalities"
 
-
 -- | Gets the new nominals and modalities
 nomsMods :: Spec_Wrapper -> ([MODALITY],[NOMINAL])
 nomsMods (Spec_Wrapper (Bspec ds _) _) = foldl f ([],[]) ds
         where   f (x,y) (Simple_mod_decl ms _) = (x ++ ms,y)
-                f (x,y) (Simple_nom_decl ns _) = (x, y ++ ns)   
+                f (x,y) (Simple_nom_decl ns _) = (x, y ++ ns)  
+
+anaForms :: Spec_Wrapper -> Sign_Wrapper -> [Named Form_Wrapper]
+anaForms (Spec_Wrapper _ fs) (Sign_Wrapper s) = map (makeNamed "") fs 
+--map ((makeNamed "") . (anaForm (modies s,nomies s))) fs  
+
+-- | Analyses a formula 
+anaForm :: ([MODALITY],[NOMINAL]) -> Form_Wrapper -> Form_Wrapper
+anaForm (ms,ns) (Form_Wrapper f) = 
+        case f of 
+           -- (At n _ _) -> if n `elem`ns then Form_Wrapper f else error "Nominal not found"
+           _ -> Form_Wrapper f             
