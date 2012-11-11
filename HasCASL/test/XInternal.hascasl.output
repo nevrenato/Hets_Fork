@@ -1,0 +1,11 @@
+internal
+{types s, t
+funs  o, q : s -> t
+. o = q;
+}
+types
+s : Type;
+t : Type
+op o : s -> t
+op q : s -> t
+. o = q
