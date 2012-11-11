@@ -1,4 +1,0 @@
-sort s, u;
-ops a, o : s
-. a = o
-. o = a %implied

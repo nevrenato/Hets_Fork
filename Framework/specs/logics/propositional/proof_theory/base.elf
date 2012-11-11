@@ -1,5 +1,0 @@
-%read "../syntax/base.elf".
-
-%sig BasePF = {
-  %include Base %open o ded.
-}.

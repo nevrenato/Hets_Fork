@@ -1,7 +1,0 @@
-(cl-text moduleElim
-
-(P x)
-
-(cl-module M (cl-excludes x y z) (forall (a b c) (and (P a) (Q b) (R c))))
-
-)

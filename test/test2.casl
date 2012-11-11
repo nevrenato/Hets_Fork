@@ -1,8 +1,0 @@
-library test2
-
-%%from test1 get sp
-
-spec cache =
-  sorts Serverfs; cfsClientfs
-  free type Pfs ::= Pfs(sfs:Serverfs; cfsClientfs)
-end

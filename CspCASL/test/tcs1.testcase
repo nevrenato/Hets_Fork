@@ -1,9 +1,0 @@
-tcs1.cspcasl
-CoreCspCASL
-++
-ccspec tcs1
-data sorts S, T
-     ops   c : S;
-           d : T
-process c -> SKIP || d -> SKIP
-end

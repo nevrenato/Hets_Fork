@@ -1,4 +1,0 @@
-sort s, t;
-ops a, o : s
-. def a
-. o = a %implied

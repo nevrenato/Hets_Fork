@@ -1,7 +1,0 @@
-
-.DS_Store
-dist
-*.o
-hets
-.svn/
-*.hi

@@ -1,7 +1,0 @@
-%read "minimal.elf".
-%read "prop.elf".
-
-%view MPL-PL : MPL -> PL = {
-  ⊥ := false.
-  ⇒ := [x][y] x imp y.
-}.

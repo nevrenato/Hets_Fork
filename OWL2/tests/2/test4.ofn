@@ -1,6 +1,0 @@
-Prefix(: = <http://example.org/>)
- Ontology(
-  Declaration(Class(:a))
-  Declaration(Class(:b))
-  Declaration(Class(:c))
-  DisjointClasses( :a :b :c ))

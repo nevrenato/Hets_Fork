@@ -1,3 +1,0 @@
-load full-maude.maude
-load maude2haskell.maude
-load parsing.maude
