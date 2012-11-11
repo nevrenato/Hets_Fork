@@ -32,7 +32,6 @@ import Data.Map as Map  hiding (foldl,foldr,map)
 
 mkHint :: a -> String -> Result a
 mkHint a s = hint a s nullRange
- 
 -- | Need to check if the analyser does his work well
 deb s b = ("Debug : \n\n") ++ 
           ("Signature :" ++ (show s)) ++ 
