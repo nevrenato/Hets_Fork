@@ -14,37 +14,45 @@ arbitrary logic below.
 module TopHybrid.StatAna (thAna) where
 
 import TopHybrid.AS_TopHybrid
-import TopHybrid.Print_AS
 import TopHybrid.TopHybridSign
+import TopHybrid.Print_AS
+import CASL.Sign -- Symbol
 import Common.GlobalAnnotations
 import Common.Result
 import Common.ExtSign
 import Common.AS_Annotation
-import CASL.AS_Basic_CASL
-import CASL.Sign
 import Common.Id
-import ATerm.Lib
-import Control.Arrow
 import Control.Categorical.Bifunctor
+import Control.Monad
 import Data.List 
 import Data.Maybe
 import Data.Map as Map  hiding (foldl,foldr,map)
 
 mkHint :: a -> String -> Result a
 mkHint a s = hint a s nullRange
+
 -- | Need to check if the analyser does his work well
-deb s b = ("Debug : \n\n") ++ 
-          ("Signature :" ++ (show s)) ++ 
-          ("Spec :" ++ (show b))
+deb :: (Show a, Show b, Show c) => a -> b -> c -> String
+deb s b c = ("Debug : \n\n\n") ++ 
+            ("Signature :" ++ (show s)) ++ 
+            ("\n\n\nSpec :" ++ (show b)) ++
+            ("\n\n\nForms :" ++ (show c)) ++ 
+            ("\n\n\n")
+
 
 msgs :: Map Int String
 msgs = Map.insert 1 msg1 $ Map.insert 0 msg0 empty
         where msg0 = "Repeated nominals and/or modalities"
               msg1 = "Nominal not found"
 
+genError :: String
 genError = "Unspecific error found"
 
-----------------
+-- | Lifter of the mkNamed function 
+liftName :: (Monad m) => m a -> m (Named a)
+liftName = liftM $ makeNamed ""
+
+-- | End of auxiliar functions 
 
 -- | Collects the newly declared nomies and modies 
 colnomsMods :: [TH_BASIC_ITEM] -> ([MODALITY],[NOMINAL])
@@ -54,7 +62,7 @@ colnomsMods = foldr f ([],[])
 
 -- | Adds the newly declared nomies/modies to the signature
 -- checking for redundancy
-
+-- The nub function clears repeated elements from the list
 anaNomsMods :: [TH_BASIC_ITEM] -> Sign_Wrapper -> Result Sign_Wrapper
 anaNomsMods ds (Sign_Wrapper s) = 
                 if x' == x then return $ Sign_Wrapper s' 
@@ -65,32 +73,33 @@ anaNomsMods ds (Sign_Wrapper s) =
                 s' = s { modies = fst x', nomies = snd x' }  
                 msg = fromMaybe genError $ Map.lookup 0 msgs 
 
-
+-- | Formula analyser
 anaForm :: Sign_Wrapper -> Form_Wrapper -> Result Form_Wrapper
 anaForm (Sign_Wrapper s) (Form_Wrapper f) = 
-       case f of 
-                (At n _ _) -> if n `elem` (nomies s)
-                        then return $ Form_Wrapper f else
-                               mkError "" $ Form_Wrapper f
-                _ -> return $ Form_Wrapper f  
-        
--- | Kind of a lift of the formula analyser
-anaForms :: Spec_Wrapper -> Sign_Wrapper -> Result [Named Form_Wrapper]
-anaForms (Spec_Wrapper _ fs) s = 
-        map ((makeNamed "") . (anaForm s)) fs  
-
---foldr :: (a -> b -> b) -> b -> [a] -> b
-anaForms (Spec_Wrapper _ fs) s = 
-        foldr ( make 
+        case f of 
+                (At n _ _) -> result msg $ elem n $ nomies s
+                _ -> return $ Form_Wrapper f
+        where   msg = fromMaybe genError $ Map.lookup 1 msgs  
+                result _ True  = return $ Form_Wrapper f
+                result m False = mkError m $ Form_Wrapper f
+     
+-- | Mapper and collector of the formula list
+anaForms :: Sign_Wrapper -> [Form_Wrapper] -> Result [Named Form_Wrapper]
+anaForms s = mapM (liftName . (anaForm s)) 
 
 -- | Examining the list of formulas and collecting results 
+-- fs' needs to be done in a butcher way, cuz we don't want 
+-- the results to be collected this time
 thAna :: (Spec_Wrapper, Sign_Wrapper, GlobalAnnos) -> 
         Result (Spec_Wrapper, ExtSign Sign_Wrapper Symbol, [Named Form_Wrapper])
 
-thAna (b@(Spec_Wrapper (Bspec ds _) _), s, _) = mkHint (b, mkExtSign s', fs) $ deb s' b  
-        where   s' = fromMaybe s $ maybeResult $ anaNomsMods ds s
-                fs = anaForms b s'
+--thAna (b@(Spec_Wrapper (Bspec ds _) fs), s, _) = liftM2 (\x1 x2 -> (b,mkExtSign x1,x2)) s' fs'
+--        where   fs' = case s' of (Result _ x) -> anaForms (fromMaybe s x) fs
+--                s' = anaNomsMods ds s
 
-
-
-
+-- This version is only for debug, the commented is the final one
+thAna  (b@(Spec_Wrapper (Bspec ds _) fs), s, _) = (mkHint id (deb s' b fs')) `ap` f          
+         where                    
+                s' = anaNomsMods ds s
+                fs' = case s' of (Result _ x) -> anaForms (fromMaybe s x) fs 
+                f = liftM2 (\x1 x2 -> (b,mkExtSign x1,x2)) s' fs'
