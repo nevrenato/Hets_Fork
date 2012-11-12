@@ -27,7 +27,9 @@ import Control.Monad
 import Data.List 
 import Data.Maybe
 import Data.Map as Map  hiding (foldl,foldr,map)
-
+import Logic.Logic
+import TopHybrid.UnderLogicList
+import CASL.Logic_CASL
 mkHint :: a -> String -> Result a
 mkHint a s = hint a s nullRange
 
@@ -98,8 +100,9 @@ thAna :: (Spec_Wrapper, Sign_Wrapper, GlobalAnnos) ->
 --                s' = anaNomsMods ds s
 
 -- This version is only for debug, the commented is the final one
-thAna  (b@(Spec_Wrapper (Bspec ds _) fs), s, _) = (mkHint id (deb s' b fs')) `ap` f          
+thAna  (b@(Spec_Wrapper (Bspec ds e) fs), s@(Sign_Wrapper e'), g) = 
+                                        (mkHint id (deb s' b fs')) `ap` f          
          where                    
                 s' = anaNomsMods ds s
                 fs' = case s' of (Result _ x) -> anaForms (fromMaybe s x) fs 
-                f = liftM2 (\x1 x2 -> (b,mkExtSign x1,x2)) s' fs'
+                f = liftM2 (\x1 x2 -> (b,mkExtSign x1,x2)) s' fs' 

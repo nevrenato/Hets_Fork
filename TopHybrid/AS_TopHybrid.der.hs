@@ -46,6 +46,10 @@ data Form_Wrapper = forall f. (Show f, GetRange f, ShATermConvertible f)
 data Spec_Wrapper = forall s. (Show s, GetRange s, ShATermConvertible s) 
                                 => Spec_Wrapper (TH_BSPEC s) [Form_Wrapper]
 
+--data Spec_Wrapper = forall s. (Show s, GetRange s, ShATermConvertible s) 
+--                                => Spec_Wrapper 
+--                                      AnyLogic (TH_BSPEC s) [Form_Wrapper]
+
 data Mor = Mor 
 deriving instance Ord Mor
 deriving instance Eq Mor
@@ -67,6 +71,11 @@ instance Ord Spec_Wrapper where
 instance Eq Spec_Wrapper where
        (==) _ _= False 
 
+--instance Ord Spec_Wrapper where
+--        compare _ _ _ = EQ 
+--instance Eq Spec_Wrapper where
+--       (==) _ _ _ = False 
+
 instance GetRange Form_Wrapper where
         getRange (Form_Wrapper f) = getRange f
         rangeSpan (Form_Wrapper f) = rangeSpan f
@@ -74,3 +83,7 @@ instance GetRange Form_Wrapper where
 instance GetRange Spec_Wrapper where
         getRange (Spec_Wrapper s _) = getRange s
         rangeSpan (Spec_Wrapper s _) = rangeSpan s
+
+--instance GetRange Spec_Wrapper where
+--        getRange (Spec_Wrapper _ s _) = getRange s
+--        rangeSpan (Spec_Wrapper _ s _) = rangeSpan s
