@@ -100,7 +100,7 @@ thAna :: (Spec_Wrapper, Sign_Wrapper, GlobalAnnos) ->
 --                s' = anaNomsMods ds s
 
 -- This version is only for debug, the commented is the final one
-thAna  (b@(Spec_Wrapper (Bspec ds e) fs), s@(Sign_Wrapper e'), g) = 
+thAna  (b@(Spec_Wrapper _  (Bspec ds e) fs), s@(Sign_Wrapper e'), g) = 
                                         (mkHint id (deb s' b fs')) `ap` f          
          where                    
                 s' = anaNomsMods ds s

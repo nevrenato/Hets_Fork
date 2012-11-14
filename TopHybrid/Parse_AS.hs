@@ -25,23 +25,24 @@ import TopHybrid.AS_TopHybrid
 import TopHybrid.UnderLogicList
 
 thBasic :: AParser st Spec_Wrapper
-thBasic =
-        do
+thBasic = 
+        do 
         asKey "underlogic"
         logicName <- simpleId
-        p <- specParser $ getLogic $ show logicName
-        return p 
+        let l = getLogic $ show logicName
+        p <- thSpec l
+        return p
 
-specParser :: AnyLogic -> AParser st Spec_Wrapper
-specParser l'@(Logic l) = 
+thSpec :: AnyLogic -> AParser st Spec_Wrapper
+thSpec l@(Logic l')=
         do
         asKey "Basic_Spec"
         asKey "{"
-        s <- callParser $ parse_basic_spec l
+        s <- callParser $ parse_basic_spec l'
         asKey "}"
         i <- many itemParser 
-        f <- sepBy (formParser l') anSemiOrComma
-        return $ Spec_Wrapper (Bspec i s) f
+        f <- sepBy (formParser l) anSemiOrComma
+        return $ Spec_Wrapper l (Bspec i s) f
 
 itemParser :: AParser st TH_BASIC_ITEM
 itemParser = 

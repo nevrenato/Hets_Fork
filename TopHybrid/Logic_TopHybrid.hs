@@ -62,7 +62,7 @@ instance  ShATermConvertible Sign_Wrapper where
          fromShATermAux _ _= error "I entered here"
 
 instance ShATermConvertible Spec_Wrapper where
-         toShATermAux att (Spec_Wrapper s _) = toShATermAux att s 
+         toShATermAux att (Spec_Wrapper _ s _) = toShATermAux att s 
 --         fromShATermAux a b = mapSnd Spec_Wrapper $ fromShATermAux a b
 --                 where mapSnd f (x,y) = (x, f y)
          fromShATermAux _ _ = error "I entered here"

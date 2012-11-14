@@ -31,6 +31,7 @@ import ATC.AS_Annotation
 import ATerm.Lib
 import Common.Id
 import Data.Typeable
+import Logic.Logic
 import TopHybrid.AS_TopHybrid
 import TopHybrid.TopHybridSign
 
