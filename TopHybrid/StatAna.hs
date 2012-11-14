@@ -16,7 +16,8 @@ module TopHybrid.StatAna (thAna) where
 import TopHybrid.AS_TopHybrid
 import TopHybrid.TopHybridSign
 import TopHybrid.Print_AS
-import CASL.Sign -- Symbol
+import TopHybrid.ATC_TopHybrid
+import CASL.Sign -- Symbols
 import Common.GlobalAnnotations
 import Common.Result
 import Common.ExtSign
@@ -28,8 +29,10 @@ import Data.List
 import Data.Maybe
 import Data.Map as Map  hiding (foldl,foldr,map)
 import Logic.Logic
+import Unsafe.Coerce
 import TopHybrid.UnderLogicList
 import CASL.Logic_CASL
+import ATerm.Lib
 mkHint :: a -> String -> Result a
 mkHint a s = hint a s nullRange
 
@@ -53,6 +56,11 @@ genError = "Unspecific error found"
 -- | Lifter of the mkNamed function 
 liftName :: (Monad m) => m a -> m (Named a)
 liftName = liftM $ makeNamed ""
+
+-- | Tries to get a static analyser
+maybeCall :: Maybe a -> a
+maybeCall = fromMaybe (error "Shit")
+-- change the error function
 
 -- | End of auxiliar functions 
 
@@ -100,9 +108,37 @@ thAna :: (Spec_Wrapper, Sign_Wrapper, GlobalAnnos) ->
 --                s' = anaNomsMods ds s
 
 -- This version is only for debug, the commented is the final one
-thAna  (b@(Spec_Wrapper _  (Bspec ds e) fs), s@(Sign_Wrapper e'), g) = 
+thAna  (b@(Spec_Wrapper (Logic l) (Bspec ds e) fs), s@(Sign_Wrapper e'), g) = 
                                         (mkHint id (deb s' b fs')) `ap` f          
          where                    
                 s' = anaNomsMods ds s
                 fs' = case s' of (Result _ x) -> anaForms (fromMaybe s x) fs 
-                f = liftM2 (\x1 x2 -> (b,mkExtSign x1,x2)) s' fs' 
+                f = liftM2 (\x1 x2 -> (b,mkExtSign x1,x2)) s' fs'
+                f' = maybeCall $ basic_analysis l
+                f'' = f' (unsafeCoerce e,(empty_signature l),emptyGlobalAnnos)
+                f''' = liftM2 merger f'' f  
+
+merger (x1,x2,x3) (y1,y2,y3) = (f x1 y1, g x2 y2, h x3 y3)
+        where   f e (Spec_Wrapper l (Bspec ds _) fs) = 
+                        Spec_Wrapper l (Bspec ds e) fs
+                g (ExtSign s s') (ExtSign (Sign_Wrapper e) _) = 
+                        ExtSign (Sign_Wrapper (e {extended = s})) s'        
+                h xs fs = map (mapNamed (Form_Wrapper . UnderLogic)) xs ++ fs
+
+ 
+-- Boring instances needed for a valid program, that DriFT cannot generate
+instance  ShATermConvertible Sign_Wrapper where
+         toShATermAux att (Sign_Wrapper s) = toShATermAux att s
+--         fromShATermAux a b = mapSnd Sign_Wrapper $ fromShATermAux a b
+--                 where mapSnd f (a,b) = (a, f b)
+         fromShATermAux _ _= error "I entered here"
+
+instance ShATermConvertible Spec_Wrapper where
+         toShATermAux att (Spec_Wrapper _ s _) = toShATermAux att s 
+--         fromShATermAux a b = mapSnd Spec_Wrapper $ fromShATermAux a b
+--                 where mapSnd f (x,y) = (x, f y)
+         fromShATermAux _ _ = error "I entered here"
+
+instance ShATermConvertible Form_Wrapper where
+        toShATermAux att (Form_Wrapper f) = toShATermAux att f
+        fromShATermAux _ _ = error "I entered here"              

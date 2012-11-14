@@ -34,8 +34,6 @@ emptyTHybridSign = Sign_Wrapper $ THybridSign [] [] ()
 
 isSubTHybridSign :: Sign_Wrapper -> Sign_Wrapper -> Bool
 isSubTHybridSign (Sign_Wrapper s) (Sign_Wrapper s') = False
-
-
        
 -- Boring instances needed for a valid progam, that DriFT cannot generate
 deriving instance Show Sign_Wrapper
@@ -44,6 +42,8 @@ instance Eq Sign_Wrapper where
         (==) = undefined
 instance Ord Sign_Wrapper where
         compare = undefined  
-----------------
+instance GetRange Sign_Wrapper where
+        getRange (Sign_Wrapper s) = getRange s
+        rangeSpan (Sign_Wrapper s) = rangeSpan s
 
-
+instance GetRange (THybridSign s) where

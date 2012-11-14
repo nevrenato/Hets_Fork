@@ -54,19 +54,4 @@ instance Logic TopHybrid () Spec_Wrapper Form_Wrapper SYMB_ITEMS SYMB_MAP_ITEMS
                Sign_Wrapper Mor Symbol RawSymbol () where
                 stability TopHybrid = Experimental
 
--- Boring instances needed for a valid program, that DriFT cannot generate
-instance  ShATermConvertible Sign_Wrapper where
-         toShATermAux att (Sign_Wrapper s) = toShATermAux att s
---         fromShATermAux a b = mapSnd Sign_Wrapper $ fromShATermAux a b
---                 where mapSnd f (a,b) = (a, f b)
-         fromShATermAux _ _= error "I entered here"
 
-instance ShATermConvertible Spec_Wrapper where
-         toShATermAux att (Spec_Wrapper _ s _) = toShATermAux att s 
---         fromShATermAux a b = mapSnd Spec_Wrapper $ fromShATermAux a b
---                 where mapSnd f (x,y) = (x, f y)
-         fromShATermAux _ _ = error "I entered here"
-
-instance ShATermConvertible Form_Wrapper where
-        toShATermAux att (Form_Wrapper f) = toShATermAux att f
-        fromShATermAux _ _ = error "I entered here"
