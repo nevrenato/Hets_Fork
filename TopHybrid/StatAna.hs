@@ -46,14 +46,14 @@ deb s b c = ("Debug : \n\n\n") ++
             ("\n\n\nForms :" ++ (show c)) ++ 
             ("\n\n\n")
 
-
 msgs :: Map Int String
-msgs = Map.insert 1 msg1 $ Map.insert 0 msg0 empty
+msgs = Map.insert 2 msg2 $ Map.insert 1 msg1 $ Map.insert 0 msg0 empty
         where msg0 = "Repeated nominals and/or modalities"
               msg1 = "Nominal not found"
+              msg2 = "No static analyser for this logic"
 
-genError :: String
-genError = "Unspecific error found"
+gErr :: String
+gErr = "Unspecific error found"
 
 -- | Lifter of the mkNamed function 
 liftName :: (Monad m) => m a -> m (Named a)
@@ -61,8 +61,7 @@ liftName = liftM $ makeNamed ""
 
 -- | Tries to get a static analyser
 maybeCall :: Maybe a -> a
-maybeCall = fromMaybe (error "Shit")
--- change the error function
+maybeCall = fromMaybe $ error $ fromMaybe gErr $ Map.lookup 2 msgs 
 
 -- | End of auxiliar functions 
 
@@ -83,7 +82,7 @@ anaNomsMods ds (Sign_Wrapper s) =
                 x = colnomsMods ds
                 x' = bimap nub nub x 
                 s' = s { modies = fst x', nomies = snd x' }  
-                msg = fromMaybe genError $ Map.lookup 0 msgs 
+                msg = fromMaybe gErr $ Map.lookup 0 msgs 
 
 -- | Formula analyser
 anaForm :: Sign_Wrapper -> Form_Wrapper -> Result Form_Wrapper
@@ -91,7 +90,7 @@ anaForm (Sign_Wrapper s) (Form_Wrapper f) =
         case f of 
                 (At n _ _) -> result msg $ elem n $ nomies s
                 _ -> return $ Form_Wrapper f
-        where   msg = fromMaybe genError $ Map.lookup 1 msgs  
+        where   msg = fromMaybe gErr $ Map.lookup 1 msgs  
                 result _ True  = return $ Form_Wrapper f
                 result m False = mkError m $ Form_Wrapper f
      
@@ -100,8 +99,6 @@ anaForms :: Sign_Wrapper -> [Form_Wrapper] -> Result [Named Form_Wrapper]
 anaForms s = mapM (liftName . (anaForm s)) 
 
 -- | Examining the list of formulas and collecting results 
--- fs' needs to be done in a butcher way, cuz we don't want 
--- the results to be collected this time
 thAna :: (Spec_Wrapper, Sign_Wrapper, GlobalAnnos) -> 
         Result (Spec_Wrapper, ExtSign Sign_Wrapper Symbol, [Named Form_Wrapper])
 
