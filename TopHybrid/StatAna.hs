@@ -1,3 +1,4 @@
+{-# LANGUAGE ExistentialQuantification #-}
 {- |
 Module      :  $Header$
 License     :  GPLv2 or higher, see LICENSE.txt
@@ -33,6 +34,7 @@ import Unsafe.Coerce
 import TopHybrid.UnderLogicList
 import CASL.Logic_CASL
 import ATerm.Lib
+
 mkHint :: a -> String -> Result a
 mkHint a s = hint a s nullRange
 
@@ -103,29 +105,26 @@ anaForms s = mapM (liftName . (anaForm s))
 thAna :: (Spec_Wrapper, Sign_Wrapper, GlobalAnnos) -> 
         Result (Spec_Wrapper, ExtSign Sign_Wrapper Symbol, [Named Form_Wrapper])
 
---thAna (b@(Spec_Wrapper (Bspec ds _) fs), s, _) = liftM2 (\x1 x2 -> (b,mkExtSign x1,x2)) s' fs'
---        where   fs' = case s' of (Result _ x) -> anaForms (fromMaybe s x) fs
---                s' = anaNomsMods ds s
-
--- This version is only for debug, the commented is the final one
 thAna  (b@(Spec_Wrapper (Logic l) (Bspec ds e) fs), s@(Sign_Wrapper e'), g) = 
-                                        (mkHint id (deb s' b fs')) `ap` f          
+                                      (mkHint id (deb s' b fs')) `ap` f'        
          where                    
                 s' = anaNomsMods ds s
                 fs' = case s' of (Result _ x) -> anaForms (fromMaybe s x) fs 
                 f = liftM2 (\x1 x2 -> (b,mkExtSign x1,x2)) s' fs'
-                f' = maybeCall $ basic_analysis l
-                f'' = f' (unsafeCoerce e,(empty_signature l),emptyGlobalAnnos)
-                f''' = liftM2 merger f'' f  
+                f' = liftM2 merger (xx l (tt l e)) f  
 
 merger (x1,x2,x3) (y1,y2,y3) = (f x1 y1, g x2 y2, h x3 y3)
-        where   f e (Spec_Wrapper l (Bspec ds _) fs) = 
-                        Spec_Wrapper l (Bspec ds e) fs
-                g (ExtSign s s') (ExtSign (Sign_Wrapper e) _) = 
-                        ExtSign (Sign_Wrapper (e {extended = s})) s'        
+        where   f e (Spec_Wrapper l (Bspec ds _) fs) = Spec_Wrapper l (Bspec ds e) fs
+                g (ExtSign s1 s2) (ExtSign s3 _) = mkExtSign (addExtension s3 s1)
                 h xs fs = map (mapNamed (Form_Wrapper . UnderLogic)) xs ++ fs
 
- 
+tt :: (StaticAnalysis l bs sen si smi sign mor symb raw) => l -> a -> bs
+tt _ = unsafeCoerce 
+
+xx :: (StaticAnalysis l bs sen si smi sign mor symb raw) => l -> bs -> Result(bs,ExtSign sign symb,[Named sen])
+xx l a = (maybeCall $ basic_analysis l) (a,empty_signature l,emptyGlobalAnnos)
+
+------------------ 
 -- Boring instances needed for a valid program, that DriFT cannot generate
 instance  ShATermConvertible Sign_Wrapper where
          toShATermAux att (Sign_Wrapper s) = toShATermAux att s
