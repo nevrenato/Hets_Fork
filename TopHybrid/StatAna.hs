@@ -14,54 +14,37 @@ arbitrary logic below.
 
 module TopHybrid.StatAna (thAna) where
 
+import Logic.Logic
 import TopHybrid.AS_TopHybrid
 import TopHybrid.TopHybridSign
 import TopHybrid.Print_AS
+import TopHybrid.Utilities
 import TopHybrid.ATC_TopHybrid
 import CASL.Sign -- Symbols
 import Common.GlobalAnnotations
 import Common.Result
 import Common.ExtSign
 import Common.AS_Annotation
-import Common.Id
 import Control.Categorical.Bifunctor
 import Control.Monad
 import Data.List 
-import Data.Maybe
-import Data.Map as Map  hiding (foldl,foldr,map)
-import Logic.Logic
 import Unsafe.Coerce
-import TopHybrid.UnderLogicList
-import CASL.Logic_CASL
 import ATerm.Lib
--- Just a test
-mkHint :: a -> String -> Result a
-mkHint a s = hint a s nullRange
 
 -- | Need to check if the analyser does his work well
 deb :: (Show a, Show b, Show c) => a -> b -> c -> String
 deb s b c = ("Debug : \n\n\n") ++ 
-            ("Signature :" ++ (show s)) ++ 
-            ("\n\n\nSpec :" ++ (show b)) ++
-            ("\n\n\nForms :" ++ (show c)) ++ 
+            ("Old Signature :" ++ (show s)) ++ 
+            ("\n\n\nOld Spec :" ++ (show b)) ++
+            ("\n\n\nOld Forms :" ++ (show c)) ++ 
             ("\n\n\n")
 
-msgs :: Map Int String
-msgs = Map.insert 2 msg2 $ Map.insert 1 msg1 $ Map.insert 0 msg0 empty
-        where msg0 = "Repeated nominals and/or modalities"
-              msg1 = "Nominal not found"
-              msg2 = "No static analyser for this logic"
-
-gErr :: String
-gErr = "Unspecific error found"
-
--- | Lifter of the mkNamed function 
-liftName :: (Monad m) => m a -> m (Named a)
-liftName = liftM $ makeNamed ""
-
--- | Tries to get a static analyser
-maybeCall :: Maybe a -> a
-maybeCall = fromMaybe $ error $ fromMaybe gErr $ Map.lookup 2 msgs 
+deb' :: (Show a, Show b, Show c) => a -> b -> c -> String
+deb' s b c = ("Debug : \n\n\n") ++ 
+            ("New Signature :" ++ (show s)) ++ 
+            ("\n\n\nNew Spec :" ++ (show b)) ++
+            ("\n\n\nNew Forms :" ++ (show c)) ++ 
+            ("\n\n\n")
 
 -- | End of auxiliar functions 
 
@@ -73,56 +56,74 @@ colnomsMods = foldr f ([],[])
 
 -- | Adds the newly declared nomies/modies to the signature
 -- checking for redundancy
--- The nub function clears repeated elements from the list
+-- Note : The nub function removes repeated elements from the list
 anaNomsMods :: [TH_BASIC_ITEM] -> Sign_Wrapper -> Result Sign_Wrapper
-anaNomsMods ds (Sign_Wrapper s) = 
-                if x' == x then return $ Sign_Wrapper s' 
-                               else mkHint (Sign_Wrapper s') msg 
+anaNomsMods ds (Sign_Wrapper s) = if x' == x then return $ Sign_Wrapper s' 
+                                        else mkHint (Sign_Wrapper s') msg 
                 where
                 x = colnomsMods ds
                 x' = bimap nub nub x 
                 s' = s { modies = fst x', nomies = snd x' }  
-                msg = fromMaybe gErr $ Map.lookup 0 msgs 
+                msg = maybeE 0 Nothing
 
 -- | Formula analyser
 anaForm :: Sign_Wrapper -> Form_Wrapper -> Result Form_Wrapper
 anaForm (Sign_Wrapper s) (Form_Wrapper f) = 
         case f of 
-                (At n _ _) -> result msg $ elem n $ nomies s
+                (At n _ _) -> fun n
+                (Here n _ _) -> fun n
                 _ -> return $ Form_Wrapper f
-        where   msg = fromMaybe gErr $ Map.lookup 1 msgs  
-                result _ True  = return $ Form_Wrapper f
-                result m False = mkError m $ Form_Wrapper f
-     
--- | Mapper and collector of the formula list
-anaForms :: Sign_Wrapper -> [Form_Wrapper] -> Result [Named Form_Wrapper]
-anaForms s = mapM (liftName . (anaForm s)) 
+        where                   
+        fun n = if (n `elem` nomies s) then return $ Form_Wrapper f
+                        else mkError msg $ Form_Wrapper f    
+        msg = maybeE 1 Nothing 
+
+-- | Lift of the formula analyser
+-- Analyses each formula and collects the results 
+anaForms :: [Form_Wrapper] -> Sign_Wrapper -> Result [Named Form_Wrapper]
+anaForms f s = mapM ((liftName "") . (anaForm s)) f 
+
 
 -- | Examining the list of formulas and collecting results 
 thAna :: (Spec_Wrapper, Sign_Wrapper, GlobalAnnos) -> 
         Result (Spec_Wrapper, ExtSign Sign_Wrapper Symbol, [Named Form_Wrapper])
 
-thAna  (b@(Spec_Wrapper (Logic l) (Bspec ds e) fs), s@(Sign_Wrapper e'), g) = 
-                                      (mkHint id (deb s' b fs')) `ap` f'        
-         where                    
-                s' = anaNomsMods ds s
-                fs' = case s' of (Result _ x) -> anaForms (fromMaybe s x) fs 
-                f = liftM2 (\x1 x2 -> (b,mkExtSign x1,x2)) s' fs'
-                f' = liftM2 merger (xx l (tt l e)) f  
+thAna  (b@(Spec_Wrapper (Logic l) sp fs), s, _) = 
+                        (mkHint id (deb' b'' a'' c'')) `ap`
+                        (mkHint id (deb s' b fs')) `ap` 
+                        mergedRes 
+         where                   
+                s' = anaNomsMods (bitems sp) s
+                fs' = s' >>= (anaForms fs)
+                topAna = liftM2 (\x1 x2 -> (b,mkExtSign x1,x2)) s' fs' 
+                undA = undAna l $ und sp
+                partMerge = liftM (trimap f1 f2 f3) undA
+                mergedRes = liftM2 (<***>) partMerge topAna
+                b'' = case mergedRes of Result _ (Just (_,ExtSign b' _,_)) -> b'
+                a'' = case mergedRes of Result _ (Just (a,_,_)) -> a
+                c'' = case mergedRes of Result _ (Just (_,_,c)) -> c
 
-merger (x1,x2,x3) (y1,y2,y3) = (f x1 y1, g x2 y2, h x3 y3)
-        where   f e (Spec_Wrapper l (Bspec ds _) fs) = Spec_Wrapper l (Bspec ds e) fs
-                g (ExtSign s1 s2) (ExtSign s3 _) = mkExtSign (addExtension s3 s1)
-                h xs fs = map (mapNamed (Form_Wrapper . UnderLogic)) xs ++ fs
+-- These functions merge the content from the top and under analysis 
+f1 e (Spec_Wrapper l (Bspec ds _) fs) = Spec_Wrapper l (Bspec ds e) fs
+f2 (ExtSign s3 _) (ExtSign s1 _) = mkExtSign (addExtension s3 s1)
+f3 xs fs = map (mapNamed (Form_Wrapper . UnderLogic)) xs ++ fs
 
-tt :: (StaticAnalysis l bs sen si smi sign mor symb raw) => l -> a -> bs
-tt _ = unsafeCoerce 
+-- An unsafe function, that bypasses the typechecker, so that we can do
+-- analysis to the underlogic, as the compiler can't know if we are doing
+-- analysis to the right correspondent spec ( l -> bs ), since we don't
+-- restrict that correspondence in the top spec, Spec_Wrapper.
+unsafeToSpec :: (StaticAnalysis l bs sen si smi sign mor symb raw) => l -> a -> bs
+unsafeToSpec _ = unsafeCoerce 
 
-xx :: (StaticAnalysis l bs sen si smi sign mor symb raw) => l -> bs -> Result(bs,ExtSign sign symb,[Named sen])
-xx l a = (maybeCall $ basic_analysis l) (a,empty_signature l,emptyGlobalAnnos)
+-- Analysis of the underlogic
+undAna :: (StaticAnalysis l bs sen si smi sign mor symb raw) => 
+                l -> a -> Result(bs,ExtSign sign symb,[Named sen])
+undAna l a = (maybeE 2 $ basic_analysis l) x 
+        where x = (unsafeToSpec l a, empty_signature l, emptyGlobalAnnos)
 
------------------- 
--- Boring instances needed for a valid program, that DriFT cannot generate
+-- These instances should be automatically generated by DriFT, but it cannot
+-- since they are not declared in a usual format 
+
 instance  ShATermConvertible Sign_Wrapper where
          toShATermAux att (Sign_Wrapper s) = toShATermAux att s
 --         fromShATermAux a b = mapSnd Sign_Wrapper $ fromShATermAux a b

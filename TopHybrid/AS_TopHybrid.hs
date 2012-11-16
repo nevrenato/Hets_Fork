@@ -21,7 +21,7 @@ import Logic.Logic
 -- DrIFT command
 {-! global: GetRange !-}
 
-data TH_BSPEC s = Bspec [TH_BASIC_ITEM] s deriving Show
+data TH_BSPEC s = Bspec { bitems :: [TH_BASIC_ITEM],  und :: s } deriving Show
 
 data TH_BASIC_ITEM = Simple_mod_decl [MODALITY] Range
                    | Simple_nom_decl [NOMINAL] Range 

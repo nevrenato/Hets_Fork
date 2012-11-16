@@ -12,28 +12,22 @@ Description  : This is the list of logics that can be hybridized
 
 module TopHybrid.UnderLogicList where
 
-
 import Logic.Logic
-
--- Import of Logics
+-- Import of logics
 import CASL.Logic_CASL
-
+-- End of import of logics
 import qualified Data.Map as M
-import Data.Maybe
+import TopHybrid.Utilities
 
 -- Logics supported
 underlogicList :: [(String, AnyLogic)]
 underlogicList = [ (show CASL, Logic CASL) ]
 
+-- Build of the underlogics map
 underlogics :: M.Map String AnyLogic
 underlogics =  buildMapFromList underlogicList
  
-buildMapFromList :: (Ord a) => [(a,b)] -> (M.Map a b)
-buildMapFromList = foldl (\y (x,x') -> M.insert x x' y) M.empty
-
+-- Tries to get a logic, if it fails, then
+-- gives an error saying that the logic in question doesn't exist 
 getLogic :: String -> AnyLogic
-getLogic s = let x = M.lookup s underlogics in
-        if isNothing x then error $ "hey, the logic " ++ 
-        s ++ 
-        " doesn't exist or isn't available for that kind of use"
-        else fromJust x
+getLogic s = maybeE 3 $ M.lookup s underlogics

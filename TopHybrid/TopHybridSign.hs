@@ -35,9 +35,8 @@ emptyTHybridSign = Sign_Wrapper $ THybridSign [] [] ()
 isSubTHybridSign :: Sign_Wrapper -> Sign_Wrapper -> Bool
 isSubTHybridSign (Sign_Wrapper s) (Sign_Wrapper s') = False
 
-addExtension :: (Show s, ShATermConvertible s) =>
-        Sign_Wrapper -> s -> Sign_Wrapper
-addExtension (Sign_Wrapper s) e = Sign_Wrapper $ s { extended = e } 
+addExtension :: (Show s, ShATermConvertible s) => s -> Sign_Wrapper -> Sign_Wrapper
+addExtension e (Sign_Wrapper s) = Sign_Wrapper $ s { extended = e } 
 
 -- Boring instances needed for a valid progam, that DriFT cannot generate
 deriving instance Show Sign_Wrapper
