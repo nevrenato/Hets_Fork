@@ -34,7 +34,7 @@ import Unsafe.Coerce
 import TopHybrid.UnderLogicList
 import CASL.Logic_CASL
 import ATerm.Lib
-
+-- Just a test
 mkHint :: a -> String -> Result a
 mkHint a s = hint a s nullRange
 
