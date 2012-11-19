@@ -892,4 +892,4 @@ basicCASLAnalysis =
 
 -- | extra
 cASLsen_analysis :: (Sign () (),FORMULA ()) -> Result (FORMULA ())
-cASLsen_analysis (s,f) = (liftM fst) $ anaForm (const return) emptyMix s f 
+cASLsen_analysis (s,f) = (liftM fst) $ anaForm (const return) emptyMix s f

@@ -87,17 +87,17 @@ anaForms l f s = mapM ((liftName "") . (anaForm l s)) f
 -- | Examining the list of formulas and collecting results 
 thAna :: (Spec_Wrapper, Sign_Wrapper, GlobalAnnos) -> 
         Result (Spec_Wrapper, ExtSign Sign_Wrapper Symbol, [Named Form_Wrapper])
-thAna  (b@(Spec_Wrapper (Logic l) sp fs), s, _) = (mkHint id (dump (s,b,fs) res')) `ap` finalRes 
+thAna  (b@(Spec_Wrapper l'@(Logic l) sp fs), s, _) = (mkHint id (dump (s,b,fs) res')) `ap` finalRes 
         where                   
         undA = undAna l $ und sp 
         partMerge = liftM (trimap f1 f2 f3) undA 
         s' = anaNomsMods (bitems sp) s 
         topAna = liftM2 (\x1 x2 -> (b,mkExtSign x1,x2)) s' (return []) 
         mergedRes = liftM2 (<***>) partMerge topAna 
-        fs' = (liftM (plainSign . snd')) mergedRes >>= (anaForms (Logic l) fs) 
-        finalRes =  liftM2 (\(x1,x2,x3) f -> (x1,x2,x3++f)) mergedRes fs'
+        finalRes = mergedRes >>= \(x1,x2,x3) -> anaForms l' fs (plainSign x2) >>= return . (\x4 -> (x1,x2,x3++x4))
         res' = finalRes >>= (\(a,ExtSign s _, f) -> return (a,s,f))     
- 
+
+
 -- These functions merge the content from the top and under analysis 
 f1 e (Spec_Wrapper l (Bspec ds _) fs) = Spec_Wrapper l (Bspec ds e) fs
 f2 (ExtSign s3 _) (ExtSign s1 _) = mkExtSign (addExtension s3 s1)
