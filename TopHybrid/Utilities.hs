@@ -23,13 +23,13 @@ buildMapFromList = foldl (\y (x,x') -> M.insert x x' y) M.empty
 
 -- | List of message errors
 msgsList :: [(Int,String)]
-msgsList = [(0,msg0),(1,msg1),(2,msg2),(3,msg3)]
+msgsList = [(0,msg0),(1,msg1),(2,msg2),(3,msg3),(4,msg4)]
         where
         msg0 = "Repeated nominals and/or modalities"
         msg1 = "Nominal not found"
         msg2 = "No static analyser for this logic"
         msg3 = "The chosen logic doesn't exist, or isn't available for hybridization"
-
+        msg4 = "The chosen logic doesn't have a static analyser"
 -- | Message errors as map
 msgs :: M.Map Int String
 msgs = buildMapFromList msgsList
@@ -62,3 +62,14 @@ class TriApplicative f where
         (<***>) :: f (a -> e) (b -> f') (c -> g) -> f a b c -> f e f' g
 instance TriApplicative (,,) where
         (<***>) (f,g,h) (x,y,z) = (f x, g y, h z)
+
+
+fst' :: (a,b,c) -> a
+fst' (a,b,c) = a
+
+snd' :: (a,b,c) -> b
+snd' (a,b,c) = b
+
+trd' :: (a,b,c) -> c
+trd' (a,b,c) = c
+

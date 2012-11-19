@@ -227,6 +227,7 @@ instance StaticAnalysis CASL CASLBasicSpec CASLFORMULA
                CASLMor
                Symbol RawSymbol where
          basic_analysis CASL = Just basicCASLAnalysis
+         sen_analysis CASL = Just cASLsen_analysis
          stat_symb_map_items CASL = statSymbMapItems
          stat_symb_items CASL = statSymbItems
          signature_colimit CASL diag = return $ signColimit diag extCASLColimit
