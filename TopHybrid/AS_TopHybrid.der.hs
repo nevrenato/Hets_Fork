@@ -23,22 +23,22 @@ import Logic.Logic
 
 data TH_BSPEC s = Bspec { bitems :: [TH_BASIC_ITEM],  und :: s } deriving Show
 
-data TH_BASIC_ITEM = Simple_mod_decl [MODALITY] Range
-                   | Simple_nom_decl [NOMINAL] Range 
+data TH_BASIC_ITEM = Simple_mod_decl [MODALITY] 
+                   | Simple_nom_decl [NOMINAL] 
                      deriving Show
 
 type MODALITY = SIMPLE_ID
 type NOMINAL = SIMPLE_ID
 
-data TH_FORMULA f = At NOMINAL (TH_FORMULA f) Range 
-                  | Box MODALITY (TH_FORMULA f) Range
-                  | Dia MODALITY (TH_FORMULA f) Range
+data TH_FORMULA f = At NOMINAL (TH_FORMULA f) 
+                  | Box MODALITY (TH_FORMULA f) 
+                  | Dia MODALITY (TH_FORMULA f) 
                   | UnderLogic f
                   | Conjunction (TH_FORMULA f) (TH_FORMULA f)
                   | Disjunction (TH_FORMULA f) (TH_FORMULA f)
                   | Implication (TH_FORMULA f) (TH_FORMULA f)
-                  | BiImplication (TH_FORMULA f) (TH_FORMULA f) -- ??
-                  | Here NOMINAL f Range  
+                  | BiImplication (TH_FORMULA f) (TH_FORMULA f) 
+                  | Here NOMINAL 
                     deriving (Show, Eq, Ord)
 
 data Form_Wrapper = forall f. (Show f, GetRange f, ShATermConvertible f) 

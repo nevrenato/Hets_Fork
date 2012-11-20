@@ -23,22 +23,22 @@ import Logic.Logic
 
 data TH_BSPEC s = Bspec { bitems :: [TH_BASIC_ITEM],  und :: s } deriving Show
 
-data TH_BASIC_ITEM = Simple_mod_decl [MODALITY] Range
-                   | Simple_nom_decl [NOMINAL] Range 
+data TH_BASIC_ITEM = Simple_mod_decl [MODALITY] 
+                   | Simple_nom_decl [NOMINAL] 
                      deriving Show
 
 type MODALITY = SIMPLE_ID
 type NOMINAL = SIMPLE_ID
 
-data TH_FORMULA f = At NOMINAL (TH_FORMULA f) Range 
-                  | Box MODALITY (TH_FORMULA f) Range
-                  | Dia MODALITY (TH_FORMULA f) Range
+data TH_FORMULA f = At NOMINAL (TH_FORMULA f) 
+                  | Box MODALITY (TH_FORMULA f) 
+                  | Dia MODALITY (TH_FORMULA f) 
                   | UnderLogic f
                   | Conjunction (TH_FORMULA f) (TH_FORMULA f)
                   | Disjunction (TH_FORMULA f) (TH_FORMULA f)
                   | Implication (TH_FORMULA f) (TH_FORMULA f)
-                  | BiImplication (TH_FORMULA f) (TH_FORMULA f) -- ??
-                  | Here NOMINAL f Range  
+                  | BiImplication (TH_FORMULA f) (TH_FORMULA f) 
+                  | Here NOMINAL 
                     deriving (Show, Eq, Ord)
 
 data Form_Wrapper = forall f. (Show f, GetRange f, ShATermConvertible f) 
@@ -85,34 +85,23 @@ instance GetRange s => GetRange (TH_BSPEC s) where
     Bspec a b -> joinRanges [rangeSpan a, rangeSpan b]
 
 instance GetRange TH_BASIC_ITEM where
-  getRange x = case x of
-    Simple_mod_decl _ p -> p
-    Simple_nom_decl _ p -> p
+  getRange = const nullRange
   rangeSpan x = case x of
-    Simple_mod_decl a b -> joinRanges [rangeSpan a, rangeSpan b]
-    Simple_nom_decl a b -> joinRanges [rangeSpan a, rangeSpan b]
+    Simple_mod_decl a -> joinRanges [rangeSpan a]
+    Simple_nom_decl a -> joinRanges [rangeSpan a]
 
 instance GetRange f => GetRange (TH_FORMULA f) where
-  getRange x = case x of
-    At _ _ p -> p
-    Box _ _ p -> p
-    Dia _ _ p -> p
-    UnderLogic _ -> nullRange
-    Conjunction _ _ -> nullRange
-    Disjunction _ _ -> nullRange
-    Implication _ _ -> nullRange
-    BiImplication _ _ -> nullRange
-    Here _ _ p -> p
+  getRange = const nullRange
   rangeSpan x = case x of
-    At a b c -> joinRanges [rangeSpan a, rangeSpan b, rangeSpan c]
-    Box a b c -> joinRanges [rangeSpan a, rangeSpan b, rangeSpan c]
-    Dia a b c -> joinRanges [rangeSpan a, rangeSpan b, rangeSpan c]
+    At a b -> joinRanges [rangeSpan a, rangeSpan b]
+    Box a b -> joinRanges [rangeSpan a, rangeSpan b]
+    Dia a b -> joinRanges [rangeSpan a, rangeSpan b]
     UnderLogic a -> joinRanges [rangeSpan a]
     Conjunction a b -> joinRanges [rangeSpan a, rangeSpan b]
     Disjunction a b -> joinRanges [rangeSpan a, rangeSpan b]
     Implication a b -> joinRanges [rangeSpan a, rangeSpan b]
     BiImplication a b -> joinRanges [rangeSpan a, rangeSpan b]
-    Here a b c -> joinRanges [rangeSpan a, rangeSpan b, rangeSpan c]
+    Here a -> joinRanges [rangeSpan a]
 
 instance GetRange Mor where
   getRange = const nullRange

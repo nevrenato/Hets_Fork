@@ -46,8 +46,8 @@ dump (a,b,c) x = ("Dump : \n") ++
 -- | Collects the newly declared nomies and modies 
 colnomsMods :: [TH_BASIC_ITEM] -> ([MODALITY],[NOMINAL])
 colnomsMods = foldr f ([],[]) 
-        where   f (Simple_mod_decl ms _) = bimap (++ ms) id
-                f (Simple_nom_decl ns _) = bimap id (++ ns)  
+        where   f (Simple_mod_decl ms) = bimap (++ ms) id
+                f (Simple_nom_decl ns) = bimap id (++ ns)  
 
 -- | Adds the newly declared nomies/modies to the signature
 -- checking for redundancy
@@ -65,7 +65,7 @@ anaNomsMods ds (Sign_Wrapper s) = if x' == x then return $ Sign_Wrapper s'
 anaForm :: AnyLogic -> Sign_Wrapper -> Form_Wrapper -> Result Form_Wrapper
 anaForm l'@(Logic l) s'@(Sign_Wrapper s) (Form_Wrapper f) = 
         case f of 
-                (At n f' _) -> (anaForm l' s' $ Form_Wrapper f') >>= (nomCheck s' n)
+                (At n f') -> (anaForm l' s' $ Form_Wrapper f') >>= (nomCheck s' n)
                 (UnderLogic f') -> (undFormAna l (extended s) f') >>= (return . Form_Wrapper . UnderLogic)
                 _ -> ( return . Form_Wrapper )  f
 
@@ -74,7 +74,7 @@ anaForm l'@(Logic l) s'@(Sign_Wrapper s) (Form_Wrapper f) =
 nomCheck :: Sign_Wrapper -> NOMINAL -> Form_Wrapper -> Result Form_Wrapper
 nomCheck (Sign_Wrapper s) n (Form_Wrapper f) = if n `elem` nomies s then return ff else mkError msg ff
         where
-        ff = Form_Wrapper $ At n f nullRange
+        ff = Form_Wrapper $ At n f 
         msg = maybeE 1 Nothing 
 
 

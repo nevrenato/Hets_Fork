@@ -58,21 +58,18 @@ instance ShATermConvertible Mor where
 
 instance ShATermConvertible f => ShATermConvertible (TH_FORMULA f) where
   toShATermAux att0 xv = case xv of
-    At a b c -> do
+    At a b -> do
       (att1, a') <- toShATerm' att0 a
       (att2, b') <- toShATerm' att1 b
-      (att3, c') <- toShATerm' att2 c
-      return $ addATerm (ShAAppl "At" [a', b', c'] []) att3
-    Box a b c -> do
+      return $ addATerm (ShAAppl "At" [a', b'] []) att2
+    Box a b -> do
       (att1, a') <- toShATerm' att0 a
       (att2, b') <- toShATerm' att1 b
-      (att3, c') <- toShATerm' att2 c
-      return $ addATerm (ShAAppl "Box" [a', b', c'] []) att3
-    Dia a b c -> do
+      return $ addATerm (ShAAppl "Box" [a', b'] []) att2
+    Dia a b -> do
       (att1, a') <- toShATerm' att0 a
       (att2, b') <- toShATerm' att1 b
-      (att3, c') <- toShATerm' att2 c
-      return $ addATerm (ShAAppl "Dia" [a', b', c'] []) att3
+      return $ addATerm (ShAAppl "Dia" [a', b'] []) att2
     UnderLogic a -> do
       (att1, a') <- toShATerm' att0 a
       return $ addATerm (ShAAppl "UnderLogic" [a'] []) att1
@@ -92,36 +89,28 @@ instance ShATermConvertible f => ShATermConvertible (TH_FORMULA f) where
       (att1, a') <- toShATerm' att0 a
       (att2, b') <- toShATerm' att1 b
       return $ addATerm (ShAAppl "BiImplication" [a', b'] []) att2
-    Here a b c -> do
+    Here a -> do
       (att1, a') <- toShATerm' att0 a
-      (att2, b') <- toShATerm' att1 b
-      (att3, c') <- toShATerm' att2 c
-      return $ addATerm (ShAAppl "Here" [a', b', c'] []) att3
+      return $ addATerm (ShAAppl "Here" [a'] []) att1
   fromShATermAux ix att0 = case getShATerm ix att0 of
-    ShAAppl "At" [a, b, c] _ ->
+    ShAAppl "At" [a, b] _ ->
       case fromShATerm' a att0 of
       { (att1, a') ->
       case fromShATerm' b att1 of
       { (att2, b') ->
-      case fromShATerm' c att2 of
-      { (att3, c') ->
-      (att3, At a' b' c') }}}
-    ShAAppl "Box" [a, b, c] _ ->
+      (att2, At a' b') }}
+    ShAAppl "Box" [a, b] _ ->
       case fromShATerm' a att0 of
       { (att1, a') ->
       case fromShATerm' b att1 of
       { (att2, b') ->
-      case fromShATerm' c att2 of
-      { (att3, c') ->
-      (att3, Box a' b' c') }}}
-    ShAAppl "Dia" [a, b, c] _ ->
+      (att2, Box a' b') }}
+    ShAAppl "Dia" [a, b] _ ->
       case fromShATerm' a att0 of
       { (att1, a') ->
       case fromShATerm' b att1 of
       { (att2, b') ->
-      case fromShATerm' c att2 of
-      { (att3, c') ->
-      (att3, Dia a' b' c') }}}
+      (att2, Dia a' b') }}
     ShAAppl "UnderLogic" [a] _ ->
       case fromShATerm' a att0 of
       { (att1, a') ->
@@ -150,39 +139,29 @@ instance ShATermConvertible f => ShATermConvertible (TH_FORMULA f) where
       case fromShATerm' b att1 of
       { (att2, b') ->
       (att2, BiImplication a' b') }}
-    ShAAppl "Here" [a, b, c] _ ->
+    ShAAppl "Here" [a] _ ->
       case fromShATerm' a att0 of
       { (att1, a') ->
-      case fromShATerm' b att1 of
-      { (att2, b') ->
-      case fromShATerm' c att2 of
-      { (att3, c') ->
-      (att3, Here a' b' c') }}}
+      (att1, Here a') }
     u -> fromShATermError "TH_FORMULA" u
 
 instance ShATermConvertible TH_BASIC_ITEM where
   toShATermAux att0 xv = case xv of
-    Simple_mod_decl a b -> do
+    Simple_mod_decl a -> do
       (att1, a') <- toShATerm' att0 a
-      (att2, b') <- toShATerm' att1 b
-      return $ addATerm (ShAAppl "Simple_mod_decl" [a', b'] []) att2
-    Simple_nom_decl a b -> do
+      return $ addATerm (ShAAppl "Simple_mod_decl" [a'] []) att1
+    Simple_nom_decl a -> do
       (att1, a') <- toShATerm' att0 a
-      (att2, b') <- toShATerm' att1 b
-      return $ addATerm (ShAAppl "Simple_nom_decl" [a', b'] []) att2
+      return $ addATerm (ShAAppl "Simple_nom_decl" [a'] []) att1
   fromShATermAux ix att0 = case getShATerm ix att0 of
-    ShAAppl "Simple_mod_decl" [a, b] _ ->
+    ShAAppl "Simple_mod_decl" [a] _ ->
       case fromShATerm' a att0 of
       { (att1, a') ->
-      case fromShATerm' b att1 of
-      { (att2, b') ->
-      (att2, Simple_mod_decl a' b') }}
-    ShAAppl "Simple_nom_decl" [a, b] _ ->
+      (att1, Simple_mod_decl a') }
+    ShAAppl "Simple_nom_decl" [a] _ ->
       case fromShATerm' a att0 of
       { (att1, a') ->
-      case fromShATerm' b att1 of
-      { (att2, b') ->
-      (att2, Simple_nom_decl a' b') }}
+      (att1, Simple_nom_decl a') }
     u -> fromShATermError "TH_BASIC_ITEM" u
 
 instance ShATermConvertible s => ShATermConvertible (TH_BSPEC s) where

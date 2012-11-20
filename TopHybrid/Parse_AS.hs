@@ -20,7 +20,6 @@ import Common.Id
 import Data.Maybe
 import Text.ParserCombinators.Parsec
 import Logic.Logic
-
 import TopHybrid.AS_TopHybrid
 import TopHybrid.UnderLogicList
 
@@ -49,32 +48,37 @@ itemParser =
         do 
         asKey "modality"
         ms <- ids
-        return $ Simple_mod_decl ms nullRange
+        return $ Simple_mod_decl ms 
         <|>
         do 
         asKey "nominal"
         ns <- ids
-        return $ Simple_nom_decl ns nullRange
+        return $ Simple_nom_decl ns 
 
 ids :: AParser st [SIMPLE_ID]
 ids = sepBy simpleId anSemiOrComma 
  
 formParser :: AnyLogic -> AParser st Form_Wrapper 
-formParser l'@(Logic l) = 
+formParser (Logic l) = (fParser' l) >>= return . Form_Wrapper 
+        
+fParser :: (Sentences l f sign morphism symbol) => l -> AParser st (TH_FORMULA f)
+fParser l  =
         do
         asKey "@"
         n <- simpleId
-        (Form_Wrapper f) <- formParser l' 
-        return $ Form_Wrapper $ At n f nullRange
+        f <- formParser' l 
+        return $ At n f 
         <|>
         do 
         asKey "Here"
         n <- simpleId
-        return $ Form_Wrapper $ Here n () nullRange 
+        return $ Here n
         <|>
-        do 
-        x <- callParser $ parse_basic_sen l
-        return $ Form_Wrapper $ UnderLogic x 
+        do
+        asKey "{" 
+        f <- callParser $ parse_basic_sen l
+        asKey "}"
+        return $ UnderLogic f 
 
 
 callParser :: Maybe (AParser st a) -> AParser st a
