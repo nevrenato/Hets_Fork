@@ -26,7 +26,6 @@ import Common.Result
 import Common.ExtSign
 import Common.AS_Annotation
 import Common.Id
-import Common.DocUtils
 import Control.Categorical.Bifunctor
 import Control.Monad
 import Data.List 
@@ -95,7 +94,8 @@ anaForms l f s = mapM ((liftName "") . (anaForm l s)) f
 -- | Examining the list of formulas and collecting results 
 thAna :: (Spec_Wrapper, Sign_Wrapper, GlobalAnnos) -> 
         Result (Spec_Wrapper, ExtSign Sign_Wrapper Symbol, [Named Form_Wrapper])
-thAna  (b@(Spec_Wrapper l'@(Logic l) sp fs), s, _) = (mkHint id (dump (s,b,fs) res')) `ap` finalRes 
+thAna  (b@(Spec_Wrapper l'@(Logic l) sp fs), s, _) = -- (mkHint id (dump (s,b,fs) res')) `ap` 
+        finalRes 
         where                   
         undA = undAna l $ und sp 
         partMerge = liftM (trimap f1 f2 f3) undA 
@@ -103,7 +103,7 @@ thAna  (b@(Spec_Wrapper l'@(Logic l) sp fs), s, _) = (mkHint id (dump (s,b,fs) r
         topAna = liftM2 (\x1 x2 -> (b,mkExtSign x1,x2)) s' (return []) 
         mergedRes = liftM2 (<***>) partMerge topAna 
         finalRes = mergedRes >>= \(x1,x2,x3) -> anaForms l' fs (plainSign x2) >>= return . (\x4 -> (x1,x2,x3++x4))
-        res' = finalRes >>= (\(a,ExtSign s _, f) -> return (a,s,f))     
+--        res' = finalRes >>= (\(a,ExtSign s _, f) -> return (a,s,f))     
 
 
 -- These functions merge the content from the top and under analysis 
