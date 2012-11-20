@@ -59,14 +59,14 @@ ids :: AParser st [SIMPLE_ID]
 ids = sepBy simpleId anSemiOrComma 
  
 formParser :: AnyLogic -> AParser st Form_Wrapper 
-formParser (Logic l) = (fParser' l) >>= return . Form_Wrapper 
+formParser (Logic l) = (fParser l) >>= return . Form_Wrapper 
         
 fParser :: (Sentences l f sign morphism symbol) => l -> AParser st (TH_FORMULA f)
 fParser l  =
         do
         asKey "@"
         n <- simpleId
-        f <- formParser' l 
+        f <- fParser l 
         return $ At n f 
         <|>
         do 

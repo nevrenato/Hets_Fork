@@ -46,9 +46,3 @@ instance Eq Sign_Wrapper where
         (==) = undefined
 instance Ord Sign_Wrapper where
         compare = undefined  
-
---instance GetRange Sign_Wrapper where
---        getRange (Sign_Wrapper s) = getRange s
---        rangeSpan (Sign_Wrapper s) = rangeSpan s
---
---instance GetRange (THybridSign s) where

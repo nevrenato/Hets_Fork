@@ -26,6 +26,7 @@ import Common.Result
 import Common.ExtSign
 import Common.AS_Annotation
 import Common.Id
+import Common.DocUtils
 import Control.Categorical.Bifunctor
 import Control.Monad
 import Data.List 
@@ -66,10 +67,10 @@ anaForm :: AnyLogic -> Sign_Wrapper -> Form_Wrapper -> Result Form_Wrapper
 anaForm l'@(Logic l) s'@(Sign_Wrapper s) (Form_Wrapper f) = 
         case f of 
                 (At n f') -> (anaForm l' s' $ Form_Wrapper f') >>= (nomCheck s' n)
+                (Here n) -> nomCheck' s' n f >>= (return . Form_Wrapper) 
                 (UnderLogic f') -> (undFormAna l (extended s) f') >>= (return . Form_Wrapper . UnderLogic)
                 _ -> ( return . Form_Wrapper )  f
-
-
+  
 -- Checks nominals existence
 nomCheck :: Sign_Wrapper -> NOMINAL -> Form_Wrapper -> Result Form_Wrapper
 nomCheck (Sign_Wrapper s) n (Form_Wrapper f) = if n `elem` nomies s then return ff else mkError msg ff
@@ -77,6 +78,13 @@ nomCheck (Sign_Wrapper s) n (Form_Wrapper f) = if n `elem` nomies s then return 
         ff = Form_Wrapper $ At n f 
         msg = maybeE 1 Nothing 
 
+-- Checks nominals existence for Here formulas, this later will be optimized in
+-- order to only have one nominal check function
+nomCheck' :: (GetRange f, Show f) => 
+                        Sign_Wrapper -> NOMINAL -> (TH_FORMULA f) -> Result (TH_FORMULA f)
+nomCheck' (Sign_Wrapper s) n  = if n `elem` nomies s then return else mkError msg 
+        where
+        msg = maybeE 1 Nothing
 
 -- | Lift of the formula analyser
 -- Analyses each formula and collects the results 
