@@ -29,7 +29,7 @@ msgsList = [(0,msg0),(1,msg1),(2,msg2),(3,msg3),(4,msg4)]
         msg1 = "Nominal not found"
         msg2 = "No static analyser for this logic"
         msg3 = "The chosen logic doesn't exist, or isn't available for hybridization"
-        msg4 = "The chosen logic doesn't have a static analyser"
+        msg4 = "The chosen logic doesn't have a static analyser for formulas"
 -- | Message errors as map
 msgs :: M.Map Int String
 msgs = buildMapFromList msgsList

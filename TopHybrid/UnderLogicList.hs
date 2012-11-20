@@ -15,13 +15,14 @@ module TopHybrid.UnderLogicList where
 import Logic.Logic
 -- Import of logics
 import CASL.Logic_CASL
+import Propositional.Logic_Propositional
 -- End of import of logics
 import qualified Data.Map as M
 import TopHybrid.Utilities
 
 -- Logics supported
 underlogicList :: [(String, AnyLogic)]
-underlogicList = [ (show CASL, Logic CASL) ]
+underlogicList = [ (show CASL, Logic CASL), (show Propositional, Logic Propositional) ]
 
 -- Build of the underlogics map
 underlogics :: M.Map String AnyLogic

@@ -79,6 +79,7 @@ instance Category Sign Morphism where
 -- | Instance of Sentences for propositional logic
 instance Sentences Propositional FORMULA
     Sign Morphism Symbol where
+    parse_basic_sen Propositional = Just impFormula
     negation Propositional = Just . negForm nullRange
     -- returns the set of symbols
     sym_of Propositional = singletonList . symOf
@@ -147,6 +148,7 @@ instance StaticAnalysis Propositional
         where
           basic_analysis Propositional =
               Just basicPropositionalAnalysis
+          sen_analysis Propositional = Just pROPsen_analysis 
           empty_signature Propositional = emptySig
           is_subsig Propositional = isSubSigOf
           subsig_inclusion Propositional s = return . inclusionMap s
