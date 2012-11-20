@@ -79,6 +79,49 @@ fParser l  =
         f <- callParser $ parse_basic_sen l
         asKey "}"
         return $ UnderLogic f 
+        <|>
+        do 
+        asKey "["
+        m <- simpleId
+        asKey "]"
+        f <- fParser l
+        return $ Box m f
+        <|>
+        do 
+        asKey "<"
+        m <- simpleId
+        asKey ">"
+        f <- fParser l
+        return $ Dia m f
+        <|>
+        do
+        f <- fParser l
+        asKey "/\\"
+        f' <- fParser l
+        return $ Conjunction f f'
+        <|>
+        do 
+        f <- fParser l
+        asKey "\\/"
+        f' <- fParser l
+        return $ Disjunction f f'
+        <|>
+        do
+        f <- fParser l
+        asKey "->"
+        f' <- fParser l
+        return $ Implication f f'
+        <|>
+        do 
+        f <- fParser l
+        asKey "<->"
+        f' <- fParser l
+        return $ BiImplication f f'
+        <|>
+        do
+        asKey "neg"
+        f <- fParser l
+        return $ Neg f
 
 
 callParser :: Maybe (AParser st a) -> AParser st a

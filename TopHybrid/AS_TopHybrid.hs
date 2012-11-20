@@ -38,7 +38,8 @@ data TH_FORMULA f = At NOMINAL (TH_FORMULA f)
                   | Disjunction (TH_FORMULA f) (TH_FORMULA f)
                   | Implication (TH_FORMULA f) (TH_FORMULA f)
                   | BiImplication (TH_FORMULA f) (TH_FORMULA f) 
-                  | Here NOMINAL 
+                  | Here NOMINAL
+                  | Neg (TH_FORMULA f) 
                     deriving (Show, Eq, Ord)
 
 data Form_Wrapper = forall f. (Show f, GetRange f, ShATermConvertible f) 
@@ -102,6 +103,7 @@ instance GetRange f => GetRange (TH_FORMULA f) where
     Implication a b -> joinRanges [rangeSpan a, rangeSpan b]
     BiImplication a b -> joinRanges [rangeSpan a, rangeSpan b]
     Here a -> joinRanges [rangeSpan a]
+    Neg a -> joinRanges [rangeSpan a]
 
 instance GetRange Mor where
   getRange = const nullRange

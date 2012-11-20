@@ -66,7 +66,9 @@ anaForm :: AnyLogic -> Sign_Wrapper -> Form_Wrapper -> Result Form_Wrapper
 anaForm l'@(Logic l) s'@(Sign_Wrapper s) (Form_Wrapper f) = 
         case f of 
                 (At n f') -> (anaForm l' s' $ Form_Wrapper f') >>= (nomCheck s' n)
-                (Here n) -> nomCheck' s' n f >>= (return . Form_Wrapper) 
+                (Here n) -> nomCheck' s' n f >>= (return . Form_Wrapper)
+                (Box m f') -> (anaForm l' s' $ Form_Wrapper f') >>= (modCheck s' m)
+                (Dia m f') -> (anaForm l' s' $ Form_Wrapper f') >>= (modCheck s' m)
                 (UnderLogic f') -> (undFormAna l (extended s) f') >>= (return . Form_Wrapper . UnderLogic)
                 _ -> ( return . Form_Wrapper )  f
   
@@ -77,13 +79,21 @@ nomCheck (Sign_Wrapper s) n (Form_Wrapper f) = if n `elem` nomies s then return 
         ff = Form_Wrapper $ At n f 
         msg = maybeE 1 Nothing 
 
--- Checks nominals existence for Here formulas, this later will be optimized in
+-- Checks nominals existence, this later will be optimized in
 -- order to only have one nominal check function
 nomCheck' :: (GetRange f, Show f) => 
                         Sign_Wrapper -> NOMINAL -> (TH_FORMULA f) -> Result (TH_FORMULA f)
 nomCheck' (Sign_Wrapper s) n  = if n `elem` nomies s then return else mkError msg 
         where
         msg = maybeE 1 Nothing
+
+-- Checks modalities existence, this later will be optimized in
+-- order to only have one nominal check function
+modCheck :: Sign_Wrapper -> MODALITY -> Form_Wrapper -> Result Form_Wrapper
+modCheck (Sign_Wrapper s) n  = if n `elem` modies s then return else mkError msg 
+        where
+        msg = maybeE 1 Nothing
+
 
 -- | Lift of the formula analyser
 -- Analyses each formula and collects the results 

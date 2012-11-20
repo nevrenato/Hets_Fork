@@ -92,6 +92,9 @@ instance ShATermConvertible f => ShATermConvertible (TH_FORMULA f) where
     Here a -> do
       (att1, a') <- toShATerm' att0 a
       return $ addATerm (ShAAppl "Here" [a'] []) att1
+    Neg a -> do
+      (att1, a') <- toShATerm' att0 a
+      return $ addATerm (ShAAppl "Neg" [a'] []) att1
   fromShATermAux ix att0 = case getShATerm ix att0 of
     ShAAppl "At" [a, b] _ ->
       case fromShATerm' a att0 of
@@ -143,6 +146,10 @@ instance ShATermConvertible f => ShATermConvertible (TH_FORMULA f) where
       case fromShATerm' a att0 of
       { (att1, a') ->
       (att1, Here a') }
+    ShAAppl "Neg" [a] _ ->
+      case fromShATerm' a att0 of
+      { (att1, a') ->
+      (att1, Neg a') }
     u -> fromShATermError "TH_FORMULA" u
 
 instance ShATermConvertible TH_BASIC_ITEM where
