@@ -61,39 +61,31 @@ anaNomsMods ds (Sign_Wrapper s) = if x' == x then return $ Sign_Wrapper s'
                 s' = s { modies = fst x', nomies = snd x' }  
                 msg = maybeE 0 Nothing
 
--- | Formula analyser
+-- | Top Formula analyser
 anaForm :: AnyLogic -> Sign_Wrapper -> Form_Wrapper -> Result Form_Wrapper
-anaForm l'@(Logic l) s'@(Sign_Wrapper s) (Form_Wrapper f) = 
-        case f of 
-                (At n f') -> (anaForm l' s' $ Form_Wrapper f') >>= (nomCheck s' n)
-                (Here n) -> nomCheck' s' n f >>= (return . Form_Wrapper)
-                (Box m f') -> (anaForm l' s' $ Form_Wrapper f') >>= (modCheck s' m)
-                (Dia m f') -> (anaForm l' s' $ Form_Wrapper f') >>= (modCheck s' m)
-                (UnderLogic f') -> (undFormAna l (extended s) f') >>= (return . Form_Wrapper . UnderLogic)
-                _ -> ( return . Form_Wrapper )  f
+anaForm (Logic l) s (Form_Wrapper f) = (anaForm' l s f) >>= return . Form_Wrapper
+
+anaForm' :: (Show f, GetRange f, ShATermConvertible f, 
+             StaticAnalysis l b sen sy sm si mo sy' rs) => 
+                l -> Sign_Wrapper -> (TH_FORMULA f) -> Result (TH_FORMULA sen)
+anaForm' l s'@(Sign_Wrapper s) f = 
+        case f of  
+                  (At n f') -> (anaForm' l s' f') >>= return . (At n) >>= nomOrModCheck (nomies s) n
+                  (Box m f') -> (anaForm' l s' f') >>= return . (Box m) >>= nomOrModCheck (modies s) m
+                  (Dia m f') -> (anaForm' l s' f') >>= return . (Dia m) >>= nomOrModCheck (modies s) m
+                  (Conjunction f' f'') -> (liftM2 Conjunction) (anaForm' l s' f') (anaForm' l s' f'')
+                  (Disjunction f' f'') -> (liftM2 Disjunction) (anaForm' l s' f') (anaForm' l s' f'')
+                  (BiImplication f' f'') -> (liftM2 BiImplication) (anaForm' l s' f') (anaForm' l s' f')
+                  (Here n) -> nomOrModCheck (nomies s) n $ Here n 
+                  (Neg f') -> (liftM Neg) (anaForm' l s' f')
+                  (UnderLogic f') -> (undFormAna l (extended s) f') >>= (return . UnderLogic)
+
+-- Checks for nominals and modalities
+nomOrModCheck :: (Show f, GetRange f, ShATermConvertible f) => 
+                [SIMPLE_ID] -> SIMPLE_ID -> (TH_FORMULA f) -> Result (TH_FORMULA f)
+nomOrModCheck xs x = if x `elem` xs  then return else mkError msg
+     where msg = maybeE 1 Nothing 
   
--- Checks nominals existence
-nomCheck :: Sign_Wrapper -> NOMINAL -> Form_Wrapper -> Result Form_Wrapper
-nomCheck (Sign_Wrapper s) n (Form_Wrapper f) = if n `elem` nomies s then return ff else mkError msg ff
-        where
-        ff = Form_Wrapper $ At n f 
-        msg = maybeE 1 Nothing 
-
--- Checks nominals existence, this later will be optimized in
--- order to only have one nominal check function
-nomCheck' :: (GetRange f, Show f) => 
-                        Sign_Wrapper -> NOMINAL -> (TH_FORMULA f) -> Result (TH_FORMULA f)
-nomCheck' (Sign_Wrapper s) n  = if n `elem` nomies s then return else mkError msg 
-        where
-        msg = maybeE 1 Nothing
-
--- Checks modalities existence, this later will be optimized in
--- order to only have one nominal check function
-modCheck :: Sign_Wrapper -> MODALITY -> Form_Wrapper -> Result Form_Wrapper
-modCheck (Sign_Wrapper s) n  = if n `elem` modies s then return else mkError msg 
-        where
-        msg = maybeE 1 Nothing
-
 
 -- | Lift of the formula analyser
 -- Analyses each formula and collects the results 
