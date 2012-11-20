@@ -66,7 +66,7 @@ anaForm :: AnyLogic -> Sign_Wrapper -> Form_Wrapper -> Result Form_Wrapper
 anaForm l'@(Logic l) s'@(Sign_Wrapper s) (Form_Wrapper f) = 
         case f of 
                 (At n f' _) -> (anaForm l' s' $ Form_Wrapper f') >>= (nomCheck s' n)
-                (UnderLogic f') -> (undFormAna l (extended s) f') >>= (return . UnderLogic) >>= (return . Form_Wrapper)
+                (UnderLogic f') -> (undFormAna l (extended s) f') >>= (return . Form_Wrapper . UnderLogic)
                 _ -> ( return . Form_Wrapper )  f
 
 

@@ -892,4 +892,8 @@ basicCASLAnalysis =
 
 -- | extra
 cASLsen_analysis :: (Sign () (),FORMULA ()) -> Result (FORMULA ())
-cASLsen_analysis (s,f) = (liftM fst) $ anaForm (const return) emptyMix s f
+cASLsen_analysis (s,f) = let
+                         mix = emptyMix 
+                         allIds = unite $ getExtIds mix (extendedInfo s) : [mkIdSets (allConstIds s) (allOpIds s) $ allPredIds s]
+                         mix' = mix { mixRules = makeRules emptyGlobalAnnos allIds}
+                         in (liftM snd) $ anaForm (const return) mix' s f
