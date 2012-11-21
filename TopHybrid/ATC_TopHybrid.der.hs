@@ -29,6 +29,7 @@ module TopHybrid.ATC_TopHybrid () where
 
 import ATC.AS_Annotation
 import ATerm.Lib
+import Common.DocUtils
 import Common.Id
 import Data.Typeable
 import Logic.Logic

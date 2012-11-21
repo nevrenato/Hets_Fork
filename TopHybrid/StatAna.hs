@@ -26,6 +26,7 @@ import Common.Result
 import Common.ExtSign
 import Common.AS_Annotation
 import Common.Id
+import Common.DocUtils
 import Control.Categorical.Bifunctor
 import Control.Monad
 import Data.List 
@@ -75,13 +76,13 @@ anaForm' l s'@(Sign_Wrapper s) f =
                   (Dia m f') -> (anaForm' l s' f') >>= return . (Dia m) >>= nomOrModCheck (modies s) m
                   (Conjunction f' f'') -> (liftM2 Conjunction) (anaForm' l s' f') (anaForm' l s' f'')
                   (Disjunction f' f'') -> (liftM2 Disjunction) (anaForm' l s' f') (anaForm' l s' f'')
-                  (BiImplication f' f'') -> (liftM2 BiImplication) (anaForm' l s' f') (anaForm' l s' f')
+                  (BiImplication f' f'') -> (liftM2 BiImplication) (anaForm' l s' f') (anaForm' l s' f'')
                   (Here n) -> nomOrModCheck (nomies s) n $ Here n 
                   (Neg f') -> (liftM Neg) (anaForm' l s' f')
                   (UnderLogic f') -> (undFormAna l (extended s) f') >>= (return . UnderLogic)
 
 -- Checks for nominals and modalities
-nomOrModCheck :: (Show f, GetRange f, ShATermConvertible f) => 
+nomOrModCheck :: (Pretty f, GetRange f, ShATermConvertible f) => 
                 [SIMPLE_ID] -> SIMPLE_ID -> (TH_FORMULA f) -> Result (TH_FORMULA f)
 nomOrModCheck xs x = if x `elem` xs  then return else mkError msg
      where msg = maybeE 1 Nothing 

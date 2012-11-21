@@ -18,6 +18,7 @@ import Common.Id
 import Data.Typeable
 import ATerm.Lib
 import Logic.Logic
+import Common.DocUtils
 -- DrIFT command
 {-! global: GetRange !-}
 
@@ -42,11 +43,11 @@ data TH_FORMULA f = At NOMINAL (TH_FORMULA f)
                   | Neg (TH_FORMULA f) 
                     deriving (Show, Eq, Ord)
 
-data Form_Wrapper = forall f. (Show f, GetRange f, ShATermConvertible f) 
+data Form_Wrapper = forall f. (Pretty f, GetRange f, ShATermConvertible f) 
                                 => Form_Wrapper (TH_FORMULA f)
 
 
-data Spec_Wrapper = forall s. (Show s, GetRange s, ShATermConvertible s) 
+data Spec_Wrapper = forall s. (Pretty s, GetRange s, ShATermConvertible s) 
                                 => Spec_Wrapper AnyLogic (TH_BSPEC s) [Form_Wrapper]
 
 data Mor = Mor 

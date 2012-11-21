@@ -17,8 +17,8 @@ import TopHybrid.AS_TopHybrid
 import Common.Id
 import ATerm.Lib
 import Data.Typeable
-
-data Sign_Wrapper = forall s. (Show s, ShATermConvertible s) 
+import Common.DocUtils
+data Sign_Wrapper = forall s. (Pretty s, ShATermConvertible s) 
                         => Sign_Wrapper (THybridSign s)
 
 data THybridSign s = THybridSign
@@ -35,7 +35,7 @@ emptyTHybridSign = Sign_Wrapper $ THybridSign [] [] ()
 isSubTHybridSign :: Sign_Wrapper -> Sign_Wrapper -> Bool
 isSubTHybridSign (Sign_Wrapper s) (Sign_Wrapper s') = False
 
-addExtension :: (Show s, ShATermConvertible s) => s -> Sign_Wrapper -> Sign_Wrapper
+addExtension :: (Pretty s, ShATermConvertible s) => s -> Sign_Wrapper -> Sign_Wrapper
 addExtension e (Sign_Wrapper s) = Sign_Wrapper $ s { extended = e } 
 
 -- Boring instances needed for a valid progam, that DriFT cannot generate

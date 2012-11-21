@@ -18,20 +18,36 @@ import Common.DocUtils
 import TopHybrid.AS_TopHybrid
 import TopHybrid.TopHybridSign
 
-instance (Show f) => Pretty (TH_FORMULA f) where
-        pretty _ = pretty ()
+instance (Pretty f) => Pretty (TH_FORMULA f) where
+        pretty (At n f) = keyword "@" <+> (pretty n) <+> (pretty f) 
+        pretty (UnderLogic f) = pretty f
+        pretty (Box m f) = keyword "[" <> (pretty m) <> keyword "]" <+> (pretty f) 
+        pretty (Dia m f) = keyword "<" <> (pretty m) <> keyword ">" <+> (pretty f) 
+        pretty (Conjunction f f') = (pretty f) <+> (keyword "/\\") <+> (pretty f')
+        pretty (Disjunction f f') = (pretty f) <+> (keyword "\\/") <+> (pretty f')
+        pretty (Implication f f') = (pretty f) <+> (keyword "->") <+> (pretty f')
+        pretty (BiImplication f f') = (pretty f) <+> (keyword "<->") <+> (pretty f')
+        pretty (Here n) = pretty n
+        pretty (Neg f) = keyword "not" <+> (pretty f)
 
-instance (Show s) => Pretty (THybridSign s) where
-        pretty _ = pretty () 
+instance (Pretty s) => Pretty (THybridSign s) where
+        pretty (THybridSign _ _ s) =    keyword "modalities" $+$
+                                        keyword "nominals" $+$
+                                        keyword "Under Sig {" $+$
+                                        (pretty s) $+$
+                                        keyword "}" 
 
-instance (Show b) => Pretty (TH_BSPEC b) where
-        pretty _ = pretty () 
+instance (Pretty b) => Pretty (TH_BSPEC b) where
+        pretty (Bspec _ b) =    keyword "decls here" 
+                                $+$ keyword "Under Spec {" $+$ 
+                                (pretty b) 
+                                $+$ keyword "}"
 
 instance Pretty Form_Wrapper where
-        pretty _ = pretty ()
+        pretty (Form_Wrapper f) = pretty f
 instance Pretty Sign_Wrapper where
-        pretty _ = pretty ()
+        pretty (Sign_Wrapper s) = pretty s
 instance Pretty Spec_Wrapper where
-        pretty _ = pretty ()
+        pretty (Spec_Wrapper _ b _) = pretty b
 instance Pretty Mor where 
         

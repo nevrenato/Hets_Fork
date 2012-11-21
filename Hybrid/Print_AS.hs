@@ -1,13 +1,13 @@
 {- |
 Module      :  $Header$
-Copyright   :  (c) Wiebke Herding, C. Maeder, Uni Bremen 2004-2006
+Copyright   :  (c) Renato Neves 
 License     :  GPLv2 or higher, see LICENSE.txt
 
-Maintainer  :  luecke@informatik.uni-bremen.de
+Maintainer  :  nevrenato@gmail.com
 Stability   :  provisional
 Portability :  portable
 
-printing AS_Hybrid ModalHybrid data types
+printing Hybrid data types
 -}
 
 module Hybrid.Print_AS where

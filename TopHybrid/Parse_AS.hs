@@ -96,7 +96,7 @@ fParser l  =
         <|>
         do
         f <- fParser l
-        asKey "/\\"
+        asKey "*"
         f' <- fParser l
         return $ Conjunction f f'
         <|>
