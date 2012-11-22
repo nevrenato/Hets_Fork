@@ -59,70 +59,61 @@ ids :: AParser st [SIMPLE_ID]
 ids = sepBy simpleId anSemiOrComma 
  
 formParser :: AnyLogic -> AParser st Form_Wrapper 
-formParser (Logic l) = (fParser l) >>= return . Form_Wrapper 
-        
+formParser (Logic l) = (fParser' l) >>= return . Form_Wrapper 
+      
+fParser' :: (Sentences l f sign morphism symbol) => l -> AParser st (TH_FORMULA f)
+fParser' l =
+        do
+        fs <- chainl1 (fParser l) op 
+        return fs 
+
+op :: AParser st ((TH_FORMULA f) -> (TH_FORMULA f) -> (TH_FORMULA f))
+op = 
+        (asKey "/\\" >> return Conjunction )
+        <|>
+        (asKey "\\/" >> return Disjunction)
+        <|>
+        (asKey "->" >> return Implication)
+        <|>
+        (asKey "<->" >> return BiImplication)
+
 fParser :: (Sentences l f sign morphism symbol) => l -> AParser st (TH_FORMULA f)
 fParser l  =
         do
+        asKey "not"
+        f <- fParser' l
+        return $ Neg f
+        <|> 
+        do
         asKey "@"
         n <- simpleId
-        f <- fParser l 
+        f <- fParser' l 
         return $ At n f 
-        <|>
-        do 
-        asKey "Here"
-        n <- simpleId
-        return $ Here n
-        <|>
-        do
-        asKey "{" 
-        f <- callParser $ parse_basic_sen l
-        asKey "}"
-        return $ UnderLogic f 
         <|>
         do 
         asKey "["
         m <- simpleId
         asKey "]"
-        f <- fParser l
+        f <- fParser' l
         return $ Box m f
         <|>
         do 
         asKey "<"
         m <- simpleId
         asKey ">"
-        f <- fParser l
+        f <- fParser' l
         return $ Dia m f
         <|>
-        do
-        f <- fParser l
-        asKey "*"
-        f' <- fParser l
-        return $ Conjunction f f'
-        <|>
         do 
-        f <- fParser l
-        asKey "\\/"
-        f' <- fParser l
-        return $ Disjunction f f'
+        n <- simpleId
+        return $ Here n
         <|>
         do
-        f <- fParser l
-        asKey "->"
-        f' <- fParser l
-        return $ Implication f f'
-        <|>
-        do 
-        f <- fParser l
-        asKey "<->"
-        f' <- fParser l
-        return $ BiImplication f f'
-        <|>
-        do
-        asKey "neg"
-        f <- fParser l
-        return $ Neg f
-
+        asKey "{"
+        f <- callParser $ parse_basic_sen l
+        asKey "}"
+        return $ UnderLogic f 
+               
 
 callParser :: Maybe (AParser st a) -> AParser st a
 callParser = fromMaybe (fail "Failed! No parser for this logic")
