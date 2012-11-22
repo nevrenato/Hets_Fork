@@ -60,12 +60,6 @@ ids = sepBy simpleId anSemiOrComma
  
 formParser :: AnyLogic -> AParser st Form_Wrapper 
 formParser (Logic l) = (fParser' l) >>= return . Form_Wrapper 
-      
-fParser' :: (Sentences l f sign morphism symbol) => l -> AParser st (TH_FORMULA f)
-fParser' l =
-        do
-        fs <- chainl1 (fParser l) op 
-        return fs 
 
 op :: AParser st ((TH_FORMULA f) -> (TH_FORMULA f) -> (TH_FORMULA f))
 op = 
@@ -76,9 +70,18 @@ op =
         (asKey "->" >> return Implication)
         <|>
         (asKey "<->" >> return BiImplication)
+     
+fParser' :: (Sentences l f sign morphism symbol) => l -> AParser st (TH_FORMULA f)
+fParser' l = chainl1 (fParser l) op >>= return 
 
 fParser :: (Sentences l f sign morphism symbol) => l -> AParser st (TH_FORMULA f)
 fParser l  =
+        do 
+        asKey "("
+        f <- fParser' l
+        asKey ")"
+        return f
+        <|>
         do
         asKey "not"
         f <- fParser' l
@@ -114,7 +117,6 @@ fParser l  =
         asKey "}"
         return $ UnderLogic f 
                
-
 callParser :: Maybe (AParser st a) -> AParser st a
 callParser = fromMaybe (fail "Failed! No parser for this logic")
 
