@@ -9,7 +9,7 @@ Portability :  portable
 
 
 Description  :
-Parser for hybrid logic with an arbitrary logic below.
+Parser for an hybridized arbitrary logic 
 -}
 
 module TopHybrid.Parse_AS where
@@ -90,7 +90,7 @@ fParser l  =
         do
         asKey "@"
         n <- simpleId
-        f <- fParser' l 
+        f <- (fParser l <|> fParser' l)
         return $ At n f 
         <|>
         do 
@@ -119,5 +119,3 @@ fParser l  =
                
 callParser :: Maybe (AParser st a) -> AParser st a
 callParser = fromMaybe (fail "Failed! No parser for this logic")
-
-instance TermParser (TH_FORMULA f) where
