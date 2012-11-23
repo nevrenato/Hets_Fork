@@ -32,23 +32,26 @@ instance (Pretty f) => Pretty (TH_FORMULA f) where
         pretty (Par f) = keyword "(" <+> (pretty f) <+> (keyword ")")
 
 instance (Pretty s) => Pretty (THybridSign s) where
-        pretty (THybridSign _ _ s) =    keyword "modalities" $+$
-                                        keyword "nominals" $+$
-                                        keyword "Under Sig {" $+$
-                                        (pretty s) $+$
-                                        keyword "}" 
+        pretty x@(THybridSign _ _ s) =    
+                keyword "Modalities" <+> (pretty $ modies x) $+$
+                keyword "Nominals" <+> (pretty $ nomies x) $+$
+                keyword "Under Sig {" $+$ (pretty s) $+$ (keyword "}") 
 
 instance (Pretty b) => Pretty (TH_BSPEC b) where
-        pretty (Bspec _ b) =    keyword "decls here" 
+        pretty (Bspec x b) =    pretty x 
                                 $+$ keyword "Under Spec {" $+$ 
                                 (pretty b) 
                                 $+$ keyword "}"
+
+instance Pretty (TH_BASIC_ITEM) where 
+        pretty (Simple_mod_decl x) = keyword "Modalities" <+> (pretty x)
+        pretty (Simple_nom_decl x) = keyword "Nominals" <+> (pretty x)
 
 instance Pretty Form_Wrapper where
         pretty (Form_Wrapper f) = pretty f
 instance Pretty Sign_Wrapper where
         pretty (Sign_Wrapper s) = pretty s
 instance Pretty Spec_Wrapper where
-        pretty (Spec_Wrapper _ b _) = pretty b
+        pretty (Spec_Wrapper _ b f) = pretty b $+$ (pretty f)
 instance Pretty Mor where 
         

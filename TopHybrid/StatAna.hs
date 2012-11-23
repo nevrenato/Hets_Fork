@@ -89,7 +89,6 @@ nomOrModCheck :: (Pretty f, GetRange f, ShATermConvertible f) =>
 nomOrModCheck xs x = if x `elem` xs  then return else mkError msg
      where msg = maybeE 1 Nothing 
   
-
 -- | Lift of the formula analyser
 -- Analyses each formula and collects the results 
 anaForms :: AnyLogic -> [Form_Wrapper] -> Sign_Wrapper -> Result [Named Form_Wrapper]
