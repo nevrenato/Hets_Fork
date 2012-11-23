@@ -20,7 +20,7 @@ import TopHybrid.TopHybridSign
 
 instance (Pretty f) => Pretty (TH_FORMULA f) where
         pretty (At n f) = keyword "@" <+> (pretty n) <+> (pretty f) 
-        pretty (UnderLogic f) = pretty f
+        pretty (UnderLogic f) = keyword "{" <+> (pretty f) <+> (keyword "}") 
         pretty (Box m f) = keyword "[" <> (pretty m) <> keyword "]" <+> (pretty f) 
         pretty (Dia m f) = keyword "<" <> (pretty m) <> keyword ">" <+> (pretty f) 
         pretty (Conjunction f f') = pretty f <+> (keyword "/\\") <+> (pretty f')

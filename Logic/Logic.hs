@@ -386,7 +386,7 @@ class ( Syntax lid basic_spec symb_items symb_map_items
              -> Result (basic_spec, ExtSign sign symbol, [Named sentence]))
          basic_analysis _ = Nothing
          -- | Analysis of just sentences
-         sen_analysis :: lid -> Maybe ( (sign,sentence) -> Result sentence )
+         sen_analysis :: lid -> Maybe ((basic_spec,sign,sentence) -> Result sentence )
          sen_analysis _ = Nothing
          -- | a basic analysis with additional arguments
          extBasicAnalysis :: lid -> IRI -> LibId

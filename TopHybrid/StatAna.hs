@@ -63,25 +63,26 @@ anaNomsMods ds (Sign_Wrapper s) = if x' == x then return $ Sign_Wrapper s'
                 msg = maybeE 0 Nothing
 
 -- | Top Formula analyser
-anaForm :: AnyLogic -> Sign_Wrapper -> Form_Wrapper -> Result Form_Wrapper
-anaForm (Logic l) s (Form_Wrapper f) = (anaForm' l s f) >>= return . Form_Wrapper
+anaForm :: (StaticAnalysis l bs sen si smi sign mor symb raw) =>  
+        l -> bs -> Sign_Wrapper -> Form_Wrapper -> Result Form_Wrapper
+anaForm l bs s (Form_Wrapper f) = (anaForm' l bs s f) >>= return . Form_Wrapper
 
 anaForm' :: (Show f, GetRange f, ShATermConvertible f, 
-             StaticAnalysis l b sen sy sm si mo sy' rs) => 
-                l -> Sign_Wrapper -> (TH_FORMULA f) -> Result (TH_FORMULA sen)
-anaForm' l s'@(Sign_Wrapper s) f = 
+             StaticAnalysis l bs sen sy sm si mo sy' rs) => 
+                l -> bs -> Sign_Wrapper -> (TH_FORMULA f) -> Result (TH_FORMULA sen)
+anaForm' l bs s'@(Sign_Wrapper s) f = 
         case f of  
-                  (At n f') -> (anaForm' l s' f') >>= return . (At n) >>= nomOrModCheck (nomies s) n
-                  (Box m f') -> (anaForm' l s' f') >>= return . (Box m) >>= nomOrModCheck (modies s) m
-                  (Dia m f') -> (anaForm' l s' f') >>= return . (Dia m) >>= nomOrModCheck (modies s) m
-                  (Conjunction f' f'') -> (liftM2 Conjunction) (anaForm' l s' f') (anaForm' l s' f'')
-                  (Disjunction f' f'') -> (liftM2 Disjunction) (anaForm' l s' f') (anaForm' l s' f'')
-                  (Implication f' f'') -> (liftM2 Implication) (anaForm' l s' f') (anaForm' l s' f'')
-                  (BiImplication f' f'') -> (liftM2 BiImplication) (anaForm' l s' f') (anaForm' l s' f'')
+                  (At n f') -> (anaForm' l bs s' f') >>= return . (At n) >>= nomOrModCheck (nomies s) n
+                  (Box m f') -> (anaForm' l bs s' f') >>= return . (Box m) >>= nomOrModCheck (modies s) m
+                  (Dia m f') -> (anaForm' l bs s' f') >>= return . (Dia m) >>= nomOrModCheck (modies s) m
+                  (Conjunction f' f'') -> (liftM2 Conjunction) (anaForm' l bs s' f') (anaForm' l bs s' f'')
+                  (Disjunction f' f'') -> (liftM2 Disjunction) (anaForm' l bs s' f') (anaForm' l bs s' f'')
+                  (Implication f' f'') -> (liftM2 Implication) (anaForm' l bs s' f') (anaForm' l bs s' f'')
+                  (BiImplication f' f'') -> (liftM2 BiImplication) (anaForm' l bs s' f') (anaForm' l bs s' f'')
                   (Here n) -> nomOrModCheck (nomies s) n $ Here n 
-                  (Neg f') -> (liftM Neg) (anaForm' l s' f')
-                  (UnderLogic f') -> (undFormAna l (extended s) f') >>= (return . UnderLogic)
-                  (Par f') -> (liftM Par) (anaForm' l s' f')
+                  (Neg f') -> (liftM Neg) (anaForm' l bs s' f')
+                  (UnderLogic f') -> (undFormAna l (extended s) f' bs) >>= (return . UnderLogic)
+                  (Par f') -> (liftM Par) (anaForm' l bs s' f')
 
 -- Checks for nominals and modalities
 nomOrModCheck :: (Pretty f, GetRange f, ShATermConvertible f) => 
@@ -91,23 +92,23 @@ nomOrModCheck xs x = if x `elem` xs  then return else mkError msg
   
 -- | Lift of the formula analyser
 -- Analyses each formula and collects the results 
-anaForms :: AnyLogic -> [Form_Wrapper] -> Sign_Wrapper -> Result [Named Form_Wrapper]
-anaForms l f s = mapM ((liftName "") . (anaForm l s)) f 
+anaForms :: (StaticAnalysis l bs sen si smi sign mor symb raw) =>  
+        l -> bs -> [Form_Wrapper] -> Sign_Wrapper -> Result [Named Form_Wrapper]
+anaForms l bs f s = mapM ((liftName "") . (anaForm l bs s)) f 
 
 
 -- | Examining the list of formulas and collecting results 
 thAna :: (Spec_Wrapper, Sign_Wrapper, GlobalAnnos) -> 
         Result (Spec_Wrapper, ExtSign Sign_Wrapper Symbol, [Named Form_Wrapper])
-thAna  (b@(Spec_Wrapper l'@(Logic l) sp fs), s, _) = -- (mkHint id (dump (s,b,fs) res')) `ap` 
-        finalRes 
+thAna  (b@(Spec_Wrapper (Logic l) sp fs), s, _) = finalRes 
         where                   
         undA = undAna l $ und sp 
+        (Result _ (Just undAf)) = undA >>= return . (\(x1,x2,x3) -> x1)
         partMerge = liftM (trimap f1 f2 f3) undA 
         s' = anaNomsMods (bitems sp) s 
         topAna = liftM2 (\x1 x2 -> (b,mkExtSign x1,x2)) s' (return []) 
         mergedRes = liftM2 (<***>) partMerge topAna 
-        finalRes = mergedRes >>= \(x1,x2,x3) -> anaForms l' fs (plainSign x2) >>= return . (\x4 -> (x1,x2,x3++x4))
---        res' = finalRes >>= (\(a,ExtSign s _, f) -> return (a,s,f))     
+        finalRes = mergedRes >>= \(x1,x2,x3) -> anaForms l (undAf) fs (plainSign x2) >>= return . (\x4 -> (x1,x2,x3++x4))
 
 
 -- These functions merge the content from the top and under analysis 
@@ -133,11 +134,10 @@ undAna l a = (maybeE 2 $ basic_analysis l) x
         where x = (unsafeToSpec l a, empty_signature l, emptyGlobalAnnos)
 
 undFormAna :: (StaticAnalysis l bs sen si smi sign mor symb raw ) =>
-                l -> a -> b -> Result sen
-undFormAna l a b = (maybeE 4 $ sen_analysis l) (a',b')
+                l -> a -> b -> bs -> Result sen
+undFormAna l a b c = (maybeE 4 $ sen_analysis l) (c, a',b')
         where   a' = (unsafeToSig l a)
                 b' = (unsafeToForm l b)
-
 
 -- These instances should be automatically generated by DriFT, but it cannot
 -- since they are not declared in a usual format 
