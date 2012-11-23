@@ -18,20 +18,18 @@ import Common.DocUtils
 import TopHybrid.AS_TopHybrid
 import TopHybrid.TopHybridSign
 
-parCover :: (Pretty f) => f -> Doc
-parCover f = (keyword "(") <+> (pretty f) <+> (keyword ")")
- 
 instance (Pretty f) => Pretty (TH_FORMULA f) where
-        pretty (At n f) = keyword "@" <+> (parCover f) 
+        pretty (At n f) = keyword "@" <+> (pretty n) <+> (pretty f) 
         pretty (UnderLogic f) = pretty f
-        pretty (Box m f) = keyword "[" <> (pretty m) <> keyword "]" <+> (parCover f) 
-        pretty (Dia m f) = keyword "<" <> (pretty m) <> keyword ">" <+> (parCover f) 
-        pretty (Conjunction f f') = (parCover f) <+> (keyword "/\\") <+> (parCover f')
-        pretty (Disjunction f f') = (parCover f) <+> (keyword "\\/") <+> (parCover f')
-        pretty (Implication f f') = (parCover f) <+> (keyword "->") <+> (parCover f')
-        pretty (BiImplication f f') = (parCover f) <+> (keyword "<->") <+> (parCover f')
+        pretty (Box m f) = keyword "[" <> (pretty m) <> keyword "]" <+> (pretty f) 
+        pretty (Dia m f) = keyword "<" <> (pretty m) <> keyword ">" <+> (pretty f) 
+        pretty (Conjunction f f') = pretty f <+> (keyword "/\\") <+> (pretty f')
+        pretty (Disjunction f f') = pretty f <+> (keyword "\\/") <+> (pretty f')
+        pretty (Implication f f') = pretty f <+> (keyword "->") <+> (pretty f')
+        pretty (BiImplication f f') = pretty f <+> (keyword "<->") <+> (pretty f')
         pretty (Here n) = pretty n
-        pretty (Neg f) = keyword "not" <+> (parCover f)
+        pretty (Neg f) = keyword "not" <+> (pretty f)
+        pretty (Par f) = keyword "(" <+> (pretty f) <+> (keyword ")")
 
 instance (Pretty s) => Pretty (THybridSign s) where
         pretty (THybridSign _ _ s) =    keyword "modalities" $+$

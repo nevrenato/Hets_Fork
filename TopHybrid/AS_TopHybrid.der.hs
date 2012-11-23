@@ -40,7 +40,8 @@ data TH_FORMULA f = At NOMINAL (TH_FORMULA f)
                   | Implication (TH_FORMULA f) (TH_FORMULA f)
                   | BiImplication (TH_FORMULA f) (TH_FORMULA f) 
                   | Here NOMINAL
-                  | Neg (TH_FORMULA f) 
+                  | Neg (TH_FORMULA f)
+                  | Par (TH_FORMULA f) 
                     deriving (Show, Eq, Ord)
 
 data Form_Wrapper = forall f. (Pretty f, GetRange f, ShATermConvertible f) 

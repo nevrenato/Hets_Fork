@@ -84,7 +84,7 @@ fParser l  =
         asKey "("
         f <- (topParser l)
         asKey ")"
-        return f
+        return $ Par f
         <|>
         do
         asKey "not"

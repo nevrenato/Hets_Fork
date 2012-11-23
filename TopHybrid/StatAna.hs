@@ -77,11 +77,11 @@ anaForm' l s'@(Sign_Wrapper s) f =
                   (Conjunction f' f'') -> (liftM2 Conjunction) (anaForm' l s' f') (anaForm' l s' f'')
                   (Disjunction f' f'') -> (liftM2 Disjunction) (anaForm' l s' f') (anaForm' l s' f'')
                   (Implication f' f'') -> (liftM2 Implication) (anaForm' l s' f') (anaForm' l s' f'')
-
                   (BiImplication f' f'') -> (liftM2 BiImplication) (anaForm' l s' f') (anaForm' l s' f'')
                   (Here n) -> nomOrModCheck (nomies s) n $ Here n 
                   (Neg f') -> (liftM Neg) (anaForm' l s' f')
                   (UnderLogic f') -> (undFormAna l (extended s) f') >>= (return . UnderLogic)
+                  (Par f') -> (liftM Par) (anaForm' l s' f')
 
 -- Checks for nominals and modalities
 nomOrModCheck :: (Pretty f, GetRange f, ShATermConvertible f) => 
