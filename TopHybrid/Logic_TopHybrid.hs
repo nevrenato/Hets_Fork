@@ -44,7 +44,8 @@ instance Syntax TopHybrid Spec_Wrapper SYMB_ITEMS SYMB_MAP_ITEMS where
         parse_symb_map_items TopHybrid = Just $ symbMapItems []
 
 instance Sentences TopHybrid Form_Wrapper Sign_Wrapper Mor Symbol where
- 
+        print_named TopHybrid = undefined
+  
 instance StaticAnalysis TopHybrid Spec_Wrapper Form_Wrapper SYMB_ITEMS SYMB_MAP_ITEMS
           Sign_Wrapper Mor Symbol RawSymbol where 
                 basic_analysis TopHybrid = Just thAna 

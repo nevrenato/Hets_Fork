@@ -103,12 +103,12 @@ thAna :: (Spec_Wrapper, Sign_Wrapper, GlobalAnnos) ->
 thAna  (b@(Spec_Wrapper (Logic l) sp fs), s, _) = finalRes 
         where                   
         undA = undAna l $ und sp 
-        (Result _ (Just undAf)) = undA >>= return . (\(x1,x2,x3) -> x1)
+        (Result _ (Just undAf)) = undA >>= return . (\(x1,x2,x3) -> x1) -- This needs to be changed
         partMerge = liftM (trimap f1 f2 f3) undA 
         s' = anaNomsMods (bitems sp) s 
         topAna = liftM2 (\x1 x2 -> (b,mkExtSign x1,x2)) s' (return []) 
         mergedRes = liftM2 (<***>) partMerge topAna 
-        finalRes = mergedRes >>= \(x1,x2,x3) -> anaForms l (undAf) fs (plainSign x2) >>= return . (\x4 -> (x1,x2,x3++x4))
+        finalRes = mergedRes >>= \(x1,x2,x3) -> anaForms l (undAf) fs (plainSign x2) >>= return . (\x4 -> (x1,x2,x3++x4)) 
 
 
 -- These functions merge the content from the top and under analysis 
