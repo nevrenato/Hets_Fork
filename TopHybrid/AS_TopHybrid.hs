@@ -15,6 +15,7 @@ below.
 module TopHybrid.AS_TopHybrid where
 
 import Common.Id
+import Common.AS_Annotation
 import Data.Typeable
 import ATerm.Lib
 import Logic.Logic
@@ -49,7 +50,7 @@ data Form_Wrapper = forall f. (Pretty f, GetRange f, ShATermConvertible f)
 
 
 data Spec_Wrapper = forall s. (Pretty s, GetRange s, ShATermConvertible s) 
-                                => Spec_Wrapper AnyLogic (TH_BSPEC s) [Form_Wrapper]
+                                => Spec_Wrapper AnyLogic (TH_BSPEC s) [Annoted Form_Wrapper]
 
 data Mor = Mor 
 deriving instance Ord Mor

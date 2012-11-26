@@ -80,10 +80,17 @@ nomOrModCheck xs x = if x `elem` xs  then return else mkError msg
      where msg = maybeE 1 Nothing 
   
 -- | Lift of the formula analyser
--- Analyses each formula and collects the results 
+-- Analyses each formula and collects the results. Converting also the
+-- annotations to the correct format. The function flipM is needed because
+-- we want the annotations independent from the analyser
 anaForms :: (StaticAnalysis l bs sen si smi sign mor symb raw) =>  
-        l -> bs -> [Form_Wrapper] -> Sign_Wrapper -> Result [Named Form_Wrapper]
-anaForms l bs f s = mapM ((liftName "") . (anaForm l bs s)) f 
+        l -> bs -> [Annoted Form_Wrapper] -> Sign_Wrapper -> Result [Named Form_Wrapper]
+anaForms l bs f s = mapM (flipM . makeNamedSen . (fmap $ anaForm l bs s)) f 
+
+-- silly things, just putting the monad in the outside of the functor
+flipM :: (Monad m) => Named (m a) -> m (Named a)
+flipM x = (return x) >>= f
+        where f y = (sentence y) >>= \a -> return $ mapNamed (\_->a) y
 
 -- | Examining the list of formulas and collecting results 
 thAna :: (Spec_Wrapper, Sign_Wrapper, GlobalAnnos) -> 

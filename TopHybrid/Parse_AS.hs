@@ -15,6 +15,7 @@ Parser for an hybridized arbitrary logic
 module TopHybrid.Parse_AS where
 
 import Common.AnnoState
+import Common.AS_Annotation
 import Common.Token
 import Common.Id
 import Data.Maybe
@@ -40,7 +41,7 @@ thSpec l@(Logic l')=
         s <- callParser $ parse_basic_spec l'
         asKey "}"
         i <- many itemParser 
-        f <- sepBy (formParser l) anSemiOrComma
+        f <- sepBy (annoFormParser l) anSemiOrComma
         return $ Spec_Wrapper l (Bspec i s) f
 
 itemParser :: AParser st TH_BASIC_ITEM
@@ -57,9 +58,13 @@ itemParser =
 
 ids :: AParser st [SIMPLE_ID]
 ids = sepBy simpleId anSemiOrComma 
- 
+
+-- Formula parser with annotations
+annoFormParser :: AnyLogic -> AParser st (Annoted Form_Wrapper)
+annoFormParser l = allAnnoParser $ formParser l 
+
 formParser :: AnyLogic -> AParser st Form_Wrapper 
-formParser (Logic l) = (topParser l) >>= return . Form_Wrapper 
+formParser (Logic l) = topParser l >>= return . Form_Wrapper 
 
 -- BinaryOps parsers, the reason to separate them, is so we can get a 
 -- precedence order
