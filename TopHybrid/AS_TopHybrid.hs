@@ -45,6 +45,14 @@ data TH_FORMULA f = At NOMINAL (TH_FORMULA f)
                   | Par (TH_FORMULA f) 
                     deriving (Show, Eq, Ord)
 
+-- Prototype
+-- An hybridized formula has the hybrid constructors; the constructors
+-- of the hybridized logic and the logic identifier, so that we can
+-- identify the underlying lgoic
+data Form_Wrapper' = forall l bs f s sm si mo sy rw.
+                        (StaticAnalysis l bs f s sm si mo sy rw) =>
+                        Form_Wrapper' l (TH_FORMULA f)
+
 data Form_Wrapper = forall f. (Pretty f, GetRange f, ShATermConvertible f) 
                                 => Form_Wrapper (TH_FORMULA f)
 
