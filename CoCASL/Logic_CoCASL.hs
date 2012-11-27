@@ -63,6 +63,7 @@ instance Sentences CoCASL CoCASLFORMULA CSign CoCASLMor Symbol where
       sym_of CoCASL = symOf
       symmap_of CoCASL = morphismToSymbMap
       sym_name CoCASL = symName
+      parse_basic_sen CoCASL = Just parseSen  
 
 instance StaticAnalysis CoCASL C_BASIC_SPEC CoCASLFORMULA
                SYMB_ITEMS SYMB_MAP_ITEMS
@@ -70,6 +71,7 @@ instance StaticAnalysis CoCASL C_BASIC_SPEC CoCASLFORMULA
                CoCASLMor
                Symbol RawSymbol where
          basic_analysis CoCASL = Just basicCoCASLAnalysis
+         sen_analysis CoCASL = Just co_sen_analysis 
          stat_symb_map_items CoCASL = statSymbMapItems
          stat_symb_items CoCASL = statSymbItems
 
