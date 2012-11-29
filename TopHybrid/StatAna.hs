@@ -28,27 +28,29 @@ import Common.Id
 import Common.DocUtils
 import Control.Categorical.Bifunctor
 import Control.Monad
-import Data.List 
+import Data.List
+import Data.Set 
 import Unsafe.Coerce
 import ATerm.Lib
 
 -- | Collects the newly declared nomies and modies 
 colnomsMods :: [TH_BASIC_ITEM] -> ([MODALITY],[NOMINAL])
-colnomsMods = foldr f ([],[]) 
+colnomsMods = Data.List.foldr f ([],[]) 
         where   f (Simple_mod_decl ms) = bimap (++ ms) id
                 f (Simple_nom_decl ns) = bimap id (++ ns)  
 
 -- | Adds the newly declared nomies/modies, and the analysed base 
 -- signature to a new sig
 -- checking for redundancy of modalities and nominals declarations
--- Note : The nub function removes repeated elements from the list
+-- Note : If there are repeated declarations, the size of the sets should
+-- be differnt that the size of the lists 
 topAna :: (Logic l sub bs sen si smi sign mor symb raw pf) => 
                 [TH_BASIC_ITEM] -> l -> sign -> Result Sgn_Wrap 
-topAna ds l sig = if x' == x then return newSig 
-                                else mkHint newSig msg
+topAna ds l sig = if not rep then return newSig else mkHint newSig msg
                 where
                 x = colnomsMods ds
-                x' = bimap nub nub x
+                x' = bimap fromList fromList x
+                rep = (size $ Data.Set.union (fst x') (snd x')) /= (length $ fst x ++ (snd x))
                 s = THybridSign (fst x') (snd x') sig
                 newSig = Sgn_Wrap l s
                 msg = maybeE 0 Nothing
@@ -56,8 +58,8 @@ topAna ds l sig = if x' == x then return newSig
 -- Checks if the modalities and nominals referred in a sentence, really exist
 -- in the signature 
 nomOrModCheck :: (Pretty f, GetRange f) => 
-                [SIMPLE_ID] -> SIMPLE_ID -> (TH_FORMULA f) -> Result (TH_FORMULA f)
-nomOrModCheck xs x = if x `elem` xs  then return else mkError msg
+                Set SIMPLE_ID -> SIMPLE_ID -> (TH_FORMULA f) -> Result (TH_FORMULA f)
+nomOrModCheck xs x = if member x xs  then return else mkError msg
      where msg = maybeE 1 Nothing 
 
  
@@ -68,6 +70,7 @@ anaForm :: (Logic l sub bs sen si smi sign mor symb raw pf) =>
         l -> bs -> Sgn_Wrap -> Frm_Wrap -> Result Frm_Wrap
 anaForm l bs s (Frm_Wrap _ f) = (unroll l bs s f) >>= return . (Frm_Wrap l)
 
+-- | Unrolling the formula, so that we can analyse it further
 unroll :: (Show f, GetRange f, ShATermConvertible f, 
              Logic l sub bs sen sy sm si mo sy' rs pf) => 
                 l -> bs -> Sgn_Wrap -> (TH_FORMULA f) -> Result (TH_FORMULA sen)
@@ -113,7 +116,7 @@ thAna  (Spc_Wrap l sp fs, _, _) = finalRes
         partMerge = undA >>= \(x1,x2,x3) -> topAna (bitems sp) l (plainSign x2) >>= \x -> return (x1,x,formMap x3)
         partMerge' = partMerge >>= \(x1,x2,x3) -> (anaForms l x1 fs x2) >>= \x -> return (x1,x2,x3++x)
         finalRes = partMerge' >>= \(x1,x2,x3) -> return (mergSpec x1, mkExtSign x2, x3)
-        formMap = map $ mapNamed $ (Frm_Wrap l) . UnderLogic
+        formMap = Data.List.map $ mapNamed $ (Frm_Wrap l) . UnderLogic
         mergSpec e = Spc_Wrap l (Bspec (bitems sp) e) fs
 
 

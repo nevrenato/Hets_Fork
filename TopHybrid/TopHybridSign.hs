@@ -34,8 +34,8 @@ data Sgn_Wrap = forall l sub bs f s sm sign mo sy rw pf.
 
 data THybridSign s = THybridSign
   { 
-    modies :: [MODALITY]
-  , nomies :: [NOMINAL]
+    modies :: Set MODALITY
+  , nomies :: Set NOMINAL
   , extended :: s
   } deriving (Show, Eq, Ord) 
 
@@ -49,15 +49,12 @@ emptyHybridSign = EmptySign
 -- compare in this way. 
 isSubHybridSign :: Sgn_Wrap -> Sgn_Wrap -> Bool
 isSubHybridSign (Sgn_Wrap l s) (Sgn_Wrap l' s') = final
-         where sAMod = fromList $ modies s
-               sBMod = fromList $ modies s' 
-               sANom = fromList $ nomies s
-               sBNom = fromList $ nomies s' 
-               resExt = if (show l == (show l')) 
-                           then is_subsig l (extended s) (unsafeCoerce $ extended s')
-                           else False
-               final = (isSubsetOf sAMod sBMod) &&
-                       (isSubsetOf sANom sBNom) && 
+               where 
+               resExt =  if (show l == (show l'))         
+                         then is_subsig l (extended s) (unsafeCoerce $ extended s')
+                         else False
+               final = (isSubsetOf (modies s) (modies s')) &&
+                       (isSubsetOf (nomies s) (nomies s')) && 
                        resExt
 -- An empty set is always contained in any other set
 isSubHybridSign EmptySign _ = True

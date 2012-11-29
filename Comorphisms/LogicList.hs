@@ -109,7 +109,7 @@ logicList =
   , Logic ExtModal
   , Logic Modal
   , Logic Hybrid
-  , Logic TopHybrid
+  , Logic Hybridize 
   , Logic cspCASL
   , Logic traceCspCASL
   , Logic failureCspCASL

@@ -11,7 +11,6 @@ Description :
 Instance of class Logic for hybridized logics 
 with an arbitrary logic under.
 -}
---a
 module TopHybrid.Logic_TopHybrid where
 
 import Logic.Logic
@@ -26,27 +25,27 @@ import CASL.Logic_CASL ()
 import CASL.SymbolParser
 import CASL.Sign
 
-data TopHybrid = TopHybrid deriving Show
+data Hybridize = Hybridize deriving Show
 
-instance Language TopHybrid where
+instance Language Hybridize where
  description _ = "Hybridization of an arbitrary logic"
 
 instance Category Sgn_Wrap Mor where
 
 instance SignExtension Sgn_Wrap where
 
-instance Syntax TopHybrid Spc_Wrap SYMB_ITEMS SYMB_MAP_ITEMS where
-        parse_basic_spec TopHybrid = Just thBasic
-        parse_symb_items TopHybrid = Just $ symbItems []
-        parse_symb_map_items TopHybrid = Just $ symbMapItems []
+instance Syntax Hybridize Spc_Wrap SYMB_ITEMS SYMB_MAP_ITEMS where
+        parse_basic_spec Hybridize = Just thBasic
+        parse_symb_items Hybridize = Just $ symbItems []
+        parse_symb_map_items Hybridize = Just $ symbMapItems []
 
-instance Sentences TopHybrid Frm_Wrap Sgn_Wrap Mor Symbol where
+instance Sentences Hybridize Frm_Wrap Sgn_Wrap Mor Symbol where
   
-instance StaticAnalysis TopHybrid Spc_Wrap Frm_Wrap SYMB_ITEMS SYMB_MAP_ITEMS
+instance StaticAnalysis Hybridize Spc_Wrap Frm_Wrap SYMB_ITEMS SYMB_MAP_ITEMS
           Sgn_Wrap Mor Symbol RawSymbol where 
-                basic_analysis TopHybrid = Just thAna 
-                empty_signature TopHybrid = emptyHybridSign
+                basic_analysis Hybridize = Just thAna 
+                empty_signature Hybridize = emptyHybridSign
 
-instance Logic TopHybrid () Spc_Wrap Frm_Wrap SYMB_ITEMS SYMB_MAP_ITEMS
+instance Logic Hybridize () Spc_Wrap Frm_Wrap SYMB_ITEMS SYMB_MAP_ITEMS
                Sgn_Wrap Mor Symbol RawSymbol () where
-                stability TopHybrid = Experimental
+                stability Hybridize = Experimental
