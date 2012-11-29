@@ -30,12 +30,13 @@ module TopHybrid.ATC_TopHybrid () where
 import ATC.AS_Annotation
 import ATerm.Lib
 import Common.AS_Annotation
-import Common.DocUtils
 import Common.Id
+import Data.Set
 import Data.Typeable
 import Logic.Logic
 import TopHybrid.AS_TopHybrid
 import TopHybrid.TopHybridSign
+import Unsafe.Coerce
 
 {-! for TopHybrid.AS_TopHybrid.TH_BSPEC derive : Typeable !-}
 {-! for TopHybrid.AS_TopHybrid.TH_BASIC_ITEM derive : Typeable !-}

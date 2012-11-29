@@ -30,6 +30,7 @@ msgsList = [(0,msg0),(1,msg1),(2,msg2),(3,msg3),(4,msg4)]
         msg2 = "No static analyser for this logic"
         msg3 = "The chosen logic doesn't exist, or isn't available for hybridization"
         msg4 = "The chosen logic doesn't have a static analyser for formulas"
+
 -- | Message errors as map
 msgs :: M.Map Int String
 msgs = buildMapFromList msgsList
@@ -44,32 +45,11 @@ liftName s = liftM $ makeNamed s
 
 -- | Checks if a given computation was sucessfull, if not
 -- gives an error message
+-- | Must i need this ?
 maybeE :: Int -> Maybe a -> a
-maybeE i = fromMaybe $ error $ fromMaybe gErr $ M.lookup i msgs 
+maybeE i = fromMaybe $ error $ fromMaybe gErr msg 
+        where msg = M.lookup i msgs
 
 -- Gives an hint message
 mkHint :: a -> String -> Result a
 mkHint a s = hint a s nullRange
-
--- (,,,) is a trifunctor
-class TriFunctor f where
-        trimap :: (a -> e) -> (b -> f') -> (c -> g) -> f a b c -> f e f' g
-instance TriFunctor (,,) where
-        trimap f g h (x,y,z) = (f x, g y, h z)
-
---- (,,,) is a triapplicative
-class TriApplicative f where
-        (<***>) :: f (a -> e) (b -> f') (c -> g) -> f a b c -> f e f' g
-instance TriApplicative (,,) where
-        (<***>) (f,g,h) (x,y,z) = (f x, g y, h z)
-
-
-fst' :: (a,b,c) -> a
-fst' (a,b,c) = a
-
-snd' :: (a,b,c) -> b
-snd' (a,b,c) = b
-
-trd' :: (a,b,c) -> c
-trd' (a,b,c) = c
-

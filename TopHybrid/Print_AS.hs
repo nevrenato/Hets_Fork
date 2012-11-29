@@ -47,11 +47,12 @@ instance Pretty (TH_BASIC_ITEM) where
         pretty (Simple_mod_decl x) = keyword "Modalities" <+> (pretty x)
         pretty (Simple_nom_decl x) = keyword "Nominals" <+> (pretty x)
 
-instance Pretty Form_Wrapper where
-        pretty (Form_Wrapper f) = pretty f
-instance Pretty Sign_Wrapper where
-        pretty (Sign_Wrapper s) = pretty s
-instance Pretty Spec_Wrapper where
-        pretty (Spec_Wrapper _ b f) = pretty b $+$ (pretty f)
+instance Pretty Frm_Wrap where
+        pretty (Frm_Wrap _ f) = pretty f
+instance Pretty Sgn_Wrap where
+        pretty (Sgn_Wrap _ s) = pretty s
+        pretty (EmptySign) = pretty ()
+instance Pretty Spc_Wrap where
+        pretty (Spc_Wrap _ b f) = pretty b $+$ (pretty f)
 instance Pretty Mor where 
-        
+
