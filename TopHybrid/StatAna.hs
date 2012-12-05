@@ -66,13 +66,19 @@ nomOrModCheck xs x = if member x xs  then return else mkError msg
 -- | Top Formula analyser
 -- The l argument could be discarded, but then we would need an extra unsafe 
 -- function, to convert the spec type...
+-- As l corresponds to the underlying logic bs should correspond to the
+-- underlying spec, as some formula analysers need the spec associated 
+-- with it
 anaForm :: (Logic l sub bs sen si smi sign mor symb raw pf) =>  
         l -> bs -> Sgn_Wrap -> Frm_Wrap -> Result Frm_Wrap
 anaForm l bs s (Frm_Wrap _ f) = (unroll l bs s f) >>= return . (Frm_Wrap l)
 
 -- Static analysis of an hybridized sentence, when it's called by an upper
--- level logic. (This is only used when we want to analyse more than 1
--- hybridized sentences)
+-- level logic. (This is only used when we want to analyse 2 or more times 
+-- hybridized, sentences).
+-- Probably this function can be merged smoothly with the above. I will check this later
+-- An hybridized sentence, with the correpondent sign already built, doesn't
+-- need the top spec, hence we can discard it and just use the underlying (und)
 anaForm' :: (Spc_Wrap, Sgn_Wrap, Frm_Wrap) -> Result Frm_Wrap
 anaForm' (Spc_Wrap l bs _, s, f) = anaForm l (und bs) s f
  
