@@ -206,9 +206,6 @@ instance Lattice a => ProjectSublogicM (CASL_SL a) Symbol where
 -- CASL logic
 
 instance Sentences CASL CASLFORMULA CASLSign CASLMor Symbol where
--- modified to be an underlogic
-      parse_basic_sen CASL = Just $ formula []
----
       map_sen CASL m = return . mapSen (const id) m
       negation CASL = negateFormula
       sym_of CASL = symOf
@@ -263,6 +260,10 @@ instance Logic CASL CASL_Sublogics
                CASLSign
                CASLMor
                Symbol RawSymbol ProofTree where
+         -- for Hybridization 
+         parse_basic_sen CASL = Just $ \_ -> formula []
+        ---
+
          stability _ = Stable
          proj_sublogic_epsilon CASL = pr_epsilon ()
          all_sublogics _ = sublogics_all [()]

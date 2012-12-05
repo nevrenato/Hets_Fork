@@ -21,11 +21,10 @@ import Data.Maybe
 import Text.ParserCombinators.Parsec
 import Logic.Logic
 import TopHybrid.AS_TopHybrid
-import TopHybrid.UnderLogicList
 
 -- the top parser; parses an entire specification
-thBasic :: AParser st Spc_Wrap
-thBasic =
+thBasic :: (String -> AnyLogic) -> AParser st Spc_Wrap
+thBasic getLogic =
         do 
         asKey "baselogic"
         logicName <- simpleId
@@ -41,13 +40,13 @@ thSpec (Logic l) =
         s <- callParser $ parse_basic_spec l
         asKey "}"
         i <- many itemParser
-        fs <- sepBy (annoFormParser l) anSemiOrComma
+        fs <- sepBy (annoFormParser l s) anSemiOrComma
         return $ Spc_Wrap l (Bspec i s) fs
 
 -- Calls the underlying logic parser, only if exists. Otherwise
 -- will throw out an error
-callParser :: Maybe (AParser st a) -> AParser st a
-callParser = fromMaybe (fail "Failed! No parser for this logic")
+callParser :: Maybe x -> x
+callParser = fromMaybe (error "Failed! No parser for this logic")
 
 -- Parses the declaration of nominals and modalities
 itemParser :: AParser st TH_BASIC_ITEM
@@ -66,21 +65,27 @@ itemParser =
 
 -- Formula parser with annotations
 annoFormParser :: (Logic l sub bs f s sm si mo sy rw pf) => 
-                        l -> AParser st (Annoted Frm_Wrap)
-annoFormParser l = allAnnoParser $ formParser l 
+                        l -> bs -> AParser st (Annoted Frm_Wrap)
+annoFormParser l b = allAnnoParser $ formParser l b 
 
 -- Just parses the formula, and wraps it in Frm_Wrap
 formParser :: (Logic l sub bs f s sm si mo sy rw pf) => 
-                        l -> AParser st Frm_Wrap
-formParser l = topParser l >>= return . (Frm_Wrap l) 
+                        l -> bs -> AParser st Frm_Wrap
+formParser l bs = topParser l bs >>= return . (Frm_Wrap l) 
+
+-- Parser of hybridization of hybridization of sentences
+formParser' :: Spc_Wrap -> AParser st Frm_Wrap
+formParser' (Spc_Wrap l b _) =
+        topParser l (und b) >>= return . (Frm_Wrap l) 
 
 -- Parser of sentences
 -- The precendence order is left associative and when the priority
 -- is defined is as follows : () > (not,@,[],<>) > /\ > \/ > (->,<->)
-topParser :: (Sentences l f sign morphism symbol) => l -> AParser st (TH_FORMULA f)
-topParser l = chainl1 fp1 impAndBiP >>= return
+topParser :: (Logic l sub bs f s sm si mo sy rw pf) => 
+                l -> bs -> AParser st (TH_FORMULA f)
+topParser l bs = chainl1 fp1 impAndBiP >>= return
         where   fp1 = (chainl1 fp2 disjP >>= return)
-                fp2 = (chainl1 (fParser l) conjP >>= return) 
+                fp2 = (chainl1 (fParser l bs) conjP >>= return) 
 
 -- BinaryOps parsers, the reason to separate them, is that so we can get a 
 -- precedence order
@@ -95,37 +100,38 @@ impAndBiP = (asKey "->" >> return Implication) <|> (asKey "<->" >> return BiImpl
 --------------
 
 -- Parser of sentences without the binary operators
-fParser :: (Sentences l f sign morphism symbol) => l -> AParser st (TH_FORMULA f)
-fParser l  =
+fParser :: (Logic l sub bs f s sm si mo sy rw pf) => 
+                l -> bs -> AParser st (TH_FORMULA f)
+fParser l bs =
         do 
         asKey "("
-        f <- (topParser l)
+        f <- (topParser l bs)
         asKey ")"
         return $ Par f
         <|>
         do
         asKey "not"
-        f <- (fParser l <|> topParser l)
+        f <- (fParser l bs <|> topParser l bs)
         return $ Neg f
         <|> 
         do
         asKey "@"
         n <- simpleId
-        f <- (fParser l <|> topParser l)
+        f <- (fParser l bs <|> topParser l bs)
         return $ At n f 
         <|>
         do 
         asKey "["
         m <- simpleId
         asKey "]"
-        f <- (fParser l <|> topParser l)
+        f <- (fParser l bs <|> topParser l bs )
         return $ Box m f
         <|>
         do 
         asKey "<"
         m <- simpleId
         asKey ">"
-        f <- ( fParser l <|> topParser l)
+        f <- ( fParser l bs <|> topParser l bs)
         return $ Dia m f
         <|>
         do 
@@ -134,6 +140,6 @@ fParser l  =
         <|>
         do
         asKey "{"
-        f <- callParser $ parse_basic_sen l
+        f <- callParser (parse_basic_sen l) bs
         asKey "}"
         return $ UnderLogic f 

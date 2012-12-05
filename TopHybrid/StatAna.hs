@@ -11,7 +11,7 @@ Description :
 Static analysis of hybrid logic with an arbitrary logic below.
 -}
 
-module TopHybrid.StatAna (thAna) where
+module TopHybrid.StatAna (thAna,anaForm') where
 
 import Logic.Logic
 import TopHybrid.AS_TopHybrid
@@ -70,6 +70,12 @@ anaForm :: (Logic l sub bs sen si smi sign mor symb raw pf) =>
         l -> bs -> Sgn_Wrap -> Frm_Wrap -> Result Frm_Wrap
 anaForm l bs s (Frm_Wrap _ f) = (unroll l bs s f) >>= return . (Frm_Wrap l)
 
+-- Static analysis of an hybridized sentence, when it's called by an upper
+-- level logic. (This is only used when we want to analyse more than 1
+-- hybridized sentences)
+anaForm' :: (Spc_Wrap, Sgn_Wrap, Frm_Wrap) -> Result Frm_Wrap
+anaForm' (Spc_Wrap l bs _, s, f) = anaForm l (und bs) s f
+ 
 -- | Unrolling the formula, so that we can analyse it further
 unroll :: (Show f, GetRange f, ShATermConvertible f, 
              Logic l sub bs sen sy sm si mo sy' rs pf) => 

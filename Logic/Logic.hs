@@ -267,10 +267,7 @@ class (Language lid, Category sign morphism, Ord sentence,
     => Sentences lid sentence sign morphism symbol
         | lid -> sentence sign morphism symbol
       where
-      -- Parser of sentence (Added for Hybridized logics)
-      parse_basic_sen :: lid -> Maybe (AParser st sentence)
-      parse_basic_sen _ = Nothing 
-
+      
       -- | sentence translation along a signature morphism
       map_sen :: lid -> morphism -> sentence -> Result sentence
       map_sen l _ _ = statFail l "map_sen"
@@ -620,6 +617,9 @@ class (StaticAnalysis lid
                  basic_spec sentence symb_items symb_map_items
                  sign morphism symbol raw_symbol proof_tree
           where
+         -- Parser of sentence (Added for Hybridized logics)
+         parse_basic_sen :: lid -> Maybe (basic_spec -> AParser st sentence)
+         parse_basic_sen _ = Nothing
 
          -- | stability of the implementation
          stability :: lid -> Stability
