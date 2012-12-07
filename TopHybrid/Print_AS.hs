@@ -11,13 +11,25 @@ Instance of class Pretty for hybrid logic
 with an arbitrary logic below.
 -}
 
-module TopHybrid.Print_AS where
+module TopHybrid.Print_AS (printNamedFormula) where
 
 import Common.Doc
 import Common.DocUtils
+import Common.AS_Annotation
 import TopHybrid.AS_TopHybrid
 import TopHybrid.TopHybridSign
+import Logic.Logic
 
+printNamedFormula :: Named Frm_Wrap -> Doc
+printNamedFormula = printAnnoted printFormula . fromLabelledSen
+
+-- the use of the function makeNamed is vacuous, it is only needed
+-- to satisfy the types of the print_named function
+printFormula :: Frm_Wrap -> Doc
+printFormula (Frm_Wrap l f) = case f of
+                               UnderLogic f' -> print_named l $ makeNamed "" f' 
+                               f' -> pretty f' 
+ 
 instance (Pretty f) => Pretty (TH_FORMULA f) where
         pretty (At n f) = keyword "@" <+> (pretty n) <+> (pretty f) 
         pretty (UnderLogic f) = keyword "{" <+> (pretty f) <+> (keyword "}") 
