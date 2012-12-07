@@ -17,6 +17,8 @@ module TopHybrid.TopHybridSign where
 
 import TopHybrid.AS_TopHybrid
 import Logic.Logic
+import Common.Result
+import Common.Id
 import Data.Typeable
 import Data.Set
 import Unsafe.Coerce
@@ -47,8 +49,8 @@ emptyHybridSign = EmptySign
 -- functions here. Also unfortunately the datatype Lids can't be directly compared
 -- so we have to use their string representation, which is bijective, hence we can
 -- compare in this way. 
-isSubHybridSign :: Sgn_Wrap -> Sgn_Wrap -> Bool
-isSubHybridSign (Sgn_Wrap l s) (Sgn_Wrap l' s') = final
+isSubTHybSgn :: Sgn_Wrap -> Sgn_Wrap -> Bool
+isSubTHybSgn (Sgn_Wrap l s) (Sgn_Wrap l' s') = final
                where 
                resExt =  if (show l == (show l'))         
                          then is_subsig l (extended s) (unsafeCoerce $ extended s')
@@ -57,15 +59,32 @@ isSubHybridSign (Sgn_Wrap l s) (Sgn_Wrap l' s') = final
                        (isSubsetOf (nomies s) (nomies s')) && 
                        resExt
 -- An empty set is always contained in any other set
-isSubHybridSign EmptySign _ = True
+isSubTHybSgn EmptySign _ = True
 -- A non empty set is never contained in an empty set
-isSubHybridSign _ EmptySign = False
+isSubTHybSgn _ EmptySign = False
+
+-- Computes the difference between two signatures. If they belong to
+-- different logics then throw an error
+sgnDiff :: Sgn_Wrap -> Sgn_Wrap -> Result Sgn_Wrap
+-- The difference between an emptySign and any other Sig results in an emptySig
+sgnDiff EmptySign _ = return EmptySign
+-- The difference between any sig and a empty sig results in the original sig
+sgnDiff s EmptySign = return s
+
+sgnDiff (Sgn_Wrap l s) (Sgn_Wrap l' s') = 
+                if (show l) /= (show l') 
+                then Result [Diag Error "signatures belong to different logics" nullRange] Nothing 
+                else ds >>= (return . (Sgn_Wrap l)) 
+                where
+                        dn = difference (nomies s) $ nomies s'
+                        dm = difference (modies s) $ modies s'
+                        ds = (signatureDiff l (extended s) $ unsafeCoerce $ extended s') >>= (return . (THybridSign dm dn)) 
 
 ----- instances needed
 deriving instance Show Sgn_Wrap
 deriving instance Typeable Sgn_Wrap
 
 instance Eq Sgn_Wrap where
-        (==) a b = (isSubHybridSign a b) && (isSubHybridSign b a) 
+        (==) a b = (isSubTHybSgn a b) && (isSubTHybSgn b a) 
 instance Ord Sgn_Wrap where
         compare a b = if a == b then EQ else GT 

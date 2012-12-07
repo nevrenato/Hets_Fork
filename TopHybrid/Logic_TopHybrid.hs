@@ -81,11 +81,11 @@ instance StaticAnalysis Hybridize Spc_Wrap Frm_Wrap SYMB_ITEMS SYMB_MAP_ITEMS
                 is_injective Hybridize = error "is_injective !"
                 add_symb_to_sign Hybridize = error "add_symb_to_sign !"
                 signature_union Hybridize = error "signature_union !"
-                signatureDiff Hybridize = error "signatureDiff !"
+                signatureDiff Hybridize = sgnDiff 
                 intersection Hybridize = error "intersection !"
                 morphism_union Hybridize = error "morphism_union !"
                 final_union Hybridize = error  "final_union !"
-                is_subsig Hybridize = error "is_subsig !"
+                is_subsig Hybridize = isSubTHybSgn 
                 subsig_inclusion Hybridize = error "sub_sig_inclusion !"
                 cogenerated_sign Hybridize = error "cogenerated_sign !"
                 generated_sign Hybridize = error "generated_sign !"

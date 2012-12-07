@@ -61,10 +61,11 @@ instance Pretty (TH_BASIC_ITEM) where
 
 instance Pretty Frm_Wrap where
         pretty (Frm_Wrap _ f) = pretty f
-instance Pretty Sgn_Wrap where
-        pretty (Sgn_Wrap _ s) = pretty s
-        pretty (EmptySign) = pretty ()
 instance Pretty Spc_Wrap where
         pretty (Spc_Wrap _ b f) = pretty b $+$ (pretty f)
 instance Pretty Mor where 
+
+instance Pretty Sgn_Wrap where
+        pretty (Sgn_Wrap _ s) = pretty s
+        pretty (EmptySign) = pretty ()
 

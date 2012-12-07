@@ -31,6 +31,7 @@ import ATC.AS_Annotation
 import ATerm.Lib
 import Common.AS_Annotation
 import Common.Id
+import Common.Result
 import Data.Set
 import Data.Typeable
 import Logic.Logic
