@@ -49,8 +49,8 @@ basicHybridAnalysis
   -> Result (BASIC_SPEC H_BASIC_ITEM H_SIG_ITEM H_FORMULA,
              ExtSign (Sign H_FORMULA HybridSign) Symbol,
              [Named (FORMULA H_FORMULA)])
-basicHybridAnalysis =
-    basicAnalysis minExpForm ana_H_BASIC_ITEM ana_H_SIG_ITEM ana_Mix
+basicHybridAnalysis = 
+       basicAnalysis minExpForm ana_H_BASIC_ITEM ana_H_SIG_ITEM ana_Mix
 
 ana_Mix :: Mix H_BASIC_ITEM H_SIG_ITEM H_FORMULA HybridSign
 ana_Mix = emptyMix

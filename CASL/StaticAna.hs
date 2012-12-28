@@ -887,8 +887,7 @@ basicCASLAnalysis :: (BASIC_SPEC () () (), Sign () (), GlobalAnnos)
   -> Result (BASIC_SPEC () () (),
              ExtSign (Sign () ()) Symbol,
              [Named (FORMULA ())])
-basicCASLAnalysis =
-    basicAnalysis (const return) (const return) (const return) emptyMix
+basicCASLAnalysis = basicAnalysis (const return) (const return) (const return) emptyMix
 
 -- | extra
 cASLsen_analysis :: 

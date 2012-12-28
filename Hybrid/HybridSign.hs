@@ -1,13 +1,11 @@
 {- |
 Module      :  $Header$
-Copyright   :  (c) Till Mossakowski, C. Maeder, Uni Bremen 2004
 License     :  GPLv2 or higher, see LICENSE.txt
 
-Maintainer  :  till@informatik.uni-bremen.de
 Stability   :  provisional
 Portability :  portable
 
-Signatures for modal logic, as extension of CASL signatures.
+Signatures for hybrid logic, as extension of CASL signatures.
 -}
 
 module Hybrid.HybridSign where

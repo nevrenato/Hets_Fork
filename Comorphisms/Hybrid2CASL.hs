@@ -82,7 +82,8 @@ transTheory (s,fs) =
            let newSig = transSig s
                fs' = fmap (mapNamed trans) fs
                newSens = fs' ++ sentences newSig
-               in return (newSig,newSens)
+               rigidSens = applRigP s
+               in return (newSig,rigidSens ++ newSens)
 
 transSig :: HSign -> CSign
 transSig hs = let workflow = (transSens hs) . (addWrldArg hs) 
@@ -273,3 +274,60 @@ newVarName xs = ("v" ++) (show $ length xs) : xs
 -- | Auxiliar datatype to determine wich is the argument of alpha
 -- | Quantified Mode or At mode
 data Mode = QtM VAR | AtM SIMPLE_ID
+
+
+-- Adds the constraints associated with the rigidity
+-- of predicates to the new spec
+applRigP :: HSign -> [Named CForm]
+applRigP hs = toName $ glPs ks rps 
+        where
+                rps = rigidPreds $ extendedInfo hs
+                ks = Set.elems $ Common.Lib.MapSet.keysSet rps
+                toName = fmap (makeNamed "PredRigidApplication") 
+
+-- Glues the constraints from all predicate names 
+glPs :: [PRED_NAME] -> PredMap -> [CForm]
+glPs ns m = concat $ foldr f [] ns
+        where
+                f a b = (g a) : b
+                g n = glP n (Common.Lib.MapSet.lookup n m)
+
+-- Glues the constraints associated by a single predicate name
+glP :: PRED_NAME -> Set.Set PredType -> [CForm]
+glP n s = foldr (\a b -> (gnCons n) a : b) [] (Set.elems s)
+
+-- Generates a rigid constraint from a single pred name and type
+-- We add the extra world argument in mkPredType so that it coincides
+-- with the later translated predicate definition
+gnCons :: PRED_NAME -> PredType -> CForm
+gnCons n (PredType ts) = mkForall decls $ mkForall [w] $ mkImpl f1 f2
+        where f1 = mkPredication predName terms 
+              f2 = mkPredication predName terms' 
+              w1 = mkVarDecl (mkSimpleId "w") worldSort
+              w2 = mkVarDecl (mkSimpleId "w'") worldSort
+              w = Var_decl [mkSimpleId "w",mkSimpleId "w'"] worldSort nullRange
+              decls = fromSort ts
+              terms = fromDecls $ w1 : decls
+              terms' = fromDecls $ w2 : decls
+              predName = mkPredName n $ mkPredType ts
+              mkPredName n' t = Qual_pred_name n' t nullRange
+              mkPredType x = Pred_type (worldSort:x) nullRange
+
+-- The next functions are auxiliar. They are need for generating the
+-- proper variables for the quantifiers,predications and operations, and
+-- are easying my work
+
+-- Auxiliar function 1 
+fromSort :: [SORT] -> [VAR_DECL]
+fromSort ss = snd $ foldr f (0::Integer,[]) ss
+        where f s (i,xs) = (i+1,mkVarDecl (mkSimpleId ("x"++(show i))) s : xs)
+
+-- Auxiliar function 2
+fromDecls :: [VAR_DECL] -> [TERM f]
+fromDecls vs = concat $ fmap fromDecl vs 
+
+-- Auxiliar function 3
+fromDecl :: VAR_DECL -> [TERM f]
+fromDecl (Var_decl vs s _ ) = foldr f [] vs
+        where f a b = (g a) : b
+              g a = mkVarTerm a s 

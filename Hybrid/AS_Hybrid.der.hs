@@ -7,7 +7,7 @@ Maintainer  :  till@informatik.uni-bremen.de
 Stability   :  provisional
 Portability :  portable
 
-Abstract syntax for modal logic extension of CASL
+Abstract syntax for hybrid logic extension of CASL
 Only the added syntax is specified
 -}
 
@@ -40,7 +40,6 @@ data H_SIG_ITEM =
 
 data MODALITY = Simple_mod SIMPLE_ID | Term_mod (TERM H_FORMULA)
              deriving (Eq, Ord, Show)
-
 
 data NOMINAL = Simple_nom SIMPLE_ID 
         deriving (Eq, Ord, Show)
