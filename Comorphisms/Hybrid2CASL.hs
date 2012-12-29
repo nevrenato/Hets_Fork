@@ -23,7 +23,7 @@ import Common.Lib.MapSet hiding (elems)
 import Common.Id
 
 import qualified Data.Set as Set
-import Data.Map hiding (union,foldl,foldr,insert,update,keysSet)
+import qualified Data.Map as M 
 
 import Hybrid.Logic_Hybrid
 import Hybrid.AS_Hybrid
@@ -82,8 +82,9 @@ transTheory (s,fs) =
            let newSig = transSig s
                fs' = fmap (mapNamed trans) fs
                newSens = fs' ++ sentences newSig
-               rigidSens = applRigP s
-               in return (newSig,rigidSens ++ newSens)
+               rigidP = applRig (rigidPreds $ extendedInfo s) "RigidPred" gnPCons 
+               rigidO = applRig (rigidOps $ extendedInfo s) "RigidOp" gnOCons
+               in return (newSig,rigidP ++ rigidO ++ newSens)
 
 transSig :: HSign -> CSign
 transSig hs = let workflow = (transSens hs) . (addWrldArg hs) 
@@ -112,7 +113,7 @@ addWorlds :: HSign -> CSign -> CSign
 addWorlds hs cs = 
         let getWorld = OpType Total [] worldSort
             s = extendedInfo hs
-            kl = keys $ nomies s
+            kl = M.keys $ nomies s
             workflow = stringToId . ("Wrl_" ++) . tokStr 
             il = fmap workflow kl 
             ins = foldr (\k m -> insert k getWorld m) (opMap cs) il
@@ -124,7 +125,7 @@ addRels :: HSign -> CSign -> CSign
 addRels hs cs = 
         let accRelT = PredType [worldSort,worldSort]
             s = extendedInfo hs
-            kl = keys $ modies s
+            kl = M.keys $ modies s
             il = fmap (stringToId . ("Acc_" ++) . tokStr) kl 
             ins = foldl (\m k -> insert k accRelT m) (predMap cs) il 
             in cs { predMap = ins }
@@ -149,8 +150,8 @@ addWrldArg hs cs = let  f (OpType a b c) = OpType a (worldSort:b) c
 -- The others come from the casl sig
 transSens :: HSign -> CSign -> CSign
 transSens hs cs = let 
-                      mods = elems (modies $ extendedInfo hs) 
-                      noms = elems (nomies $ extendedInfo hs)
+                      mods = M.elems (modies $ extendedInfo hs) 
+                      noms = M.elems (nomies $ extendedInfo hs)
                       fs = concat $ mods ++ noms 
                       workflow = makeNamed "" . trans . item
                       fs' = fmap workflow fs
@@ -238,6 +239,7 @@ trTerm m s t = case t of
                 (Sorted_term t' s' _) -> Sorted_term (trTerm m s t') s' nullRange
                 _ -> Unparsed_term "" nullRange
 
+
 -- **** Auxiliar functions and datatype **** 
 
 -- The world sort type
@@ -275,56 +277,88 @@ newVarName xs = ("v" ++) (show $ length xs) : xs
 -- | Quantified Mode or At mode
 data Mode = QtM VAR | AtM SIMPLE_ID
 
+-- **** End of auxiliar functions and datatypes section ****************
+
+------- Generation of constraints associated with rigid designators
+
+toName :: (Functor f) => String -> f a -> f (Named a)
+toName s = fmap $ makeNamed s
 
 -- Adds the constraints associated with the rigidity
--- of predicates to the new spec
-applRigP :: HSign -> [Named CForm]
-applRigP hs = toName $ glPs ks rps 
-        where
-                rps = rigidPreds $ extendedInfo hs
-                ks = Set.elems $ Common.Lib.MapSet.keysSet rps
-                toName = fmap (makeNamed "PredRigidApplication") 
+-- of predicates or operations.
+applRig :: (Ord k) => Common.Lib.MapSet.MapSet k a -> 
+           String -> 
+           (k -> a -> CForm)-> 
+           [Named CForm]
 
--- Glues the constraints from all predicate names 
-glPs :: [PRED_NAME] -> PredMap -> [CForm]
-glPs ns m = concat $ foldr f [] ns
-        where
-                f a b = (g a) : b
-                g n = glP n (Common.Lib.MapSet.lookup n m)
+applRig m s f = toName s $ glueDs ks f m
+        where ks = Set.elems $ Common.Lib.MapSet.keysSet m
 
--- Glues the constraints associated by a single predicate name
-glP :: PRED_NAME -> Set.Set PredType -> [CForm]
-glP n s = foldr (\a b -> (gnCons n) a : b) [] (Set.elems s)
+-- Given a list of designators, generates the rigidity constraints
+-- associated, and concats them into a single list 
+glueDs :: (Ord k) => [k] -> 
+          (k -> a -> CForm) ->
+          Common.Lib.MapSet.MapSet k a -> 
+          [CForm]
+glueDs ks f m = concat $ foldr (\a b -> (g a) : b) [] ks
+       where g k = glueDe k (Common.Lib.MapSet.lookup k m) f
+
+-- Given a single designator, genereates the rigidity constraints
+-- associated, and joins them into a single list 
+glueDe :: k -> Set.Set a -> (k -> a -> CForm) -> [CForm]
+glueDe n s f = foldr (\a b -> (f n) a : b) [] $ Set.elems s
+
 
 -- Generates a rigid constraint from a single pred name and type
 -- We add the extra world argument in mkPredType so that it coincides
 -- with the later translated predicate definition
-gnCons :: PRED_NAME -> PredType -> CForm
-gnCons n (PredType ts) = mkForall decls $ mkForall [w] $ mkImpl f1 f2
-        where f1 = mkPredication predName terms 
-              f2 = mkPredication predName terms' 
-              w1 = mkVarDecl (mkSimpleId "w") worldSort
-              w2 = mkVarDecl (mkSimpleId "w'") worldSort
-              w = Var_decl [mkSimpleId "w",mkSimpleId "w'"] worldSort nullRange
+gnPCons :: PRED_NAME -> PredType -> CForm
+gnPCons n (PredType ts) = mkForall decls $ mkForall wA $ mkImpl f1 f2
+        where f1 = mkPredication predName $ terms w1
+              f2 = mkPredication predName $ terms w2 
               decls = fromSort ts
-              terms = fromDecls $ w1 : decls
-              terms' = fromDecls $ w2 : decls
+              terms = \x -> fromDecls $ x : decls
               predName = mkPredName n $ mkPredType ts
               mkPredName n' t = Qual_pred_name n' t nullRange
               mkPredType x = Pred_type (worldSort:x) nullRange
 
+-- Generates a rigid constraint from a single op name and type
+-- We add the extra world argument in mkOpType so that it coincides
+-- with the later translated operation definition
+gnOCons :: OP_NAME -> OpType -> CForm
+gnOCons n (OpType o ts t) = mkForall decls $ mkForall y $ mkForall wA $ mkImpl f1 f2
+        where f1 = mkStEq (mkAppl opName $ terms w1) y' 
+              f2 = mkStEq (mkAppl opName $ terms' w2) y' 
+              y = [mkVarDecl (mkSimpleId "y") t]
+              y' = Qual_var (mkSimpleId "y") t nullRange
+              decls = fromSort ts
+              terms = \x -> fromDecls $ x : decls
+              opName = mkOpName n $ mkOpType o (worldSort:ts) t
+              mkOpName n' t = Qual_op_name n' t nullRange
+              mkOpType x y z = Op_type x y z nullRange
+
+
 -- The next functions are auxiliar. They are need for generating the
--- proper variables for the quantifiers,predications and operations, and
--- are easying my work
+-- proper variables/terms for the quantifiers,predications and operations. 
+w1 :: VAR_DECL
+w1 = mkVarDecl (mkSimpleId "w") worldSort
+w2 :: VAR_DECL
+w2 = mkVarDecl (mkSimpleId "w'") worldSort
+-- mkVarDecl doesn't support arrays as arg
+-- mkForall doesn't support single elements as arg
+wA :: [VAR_DECL]
+wA = [Var_decl [mkSimpleId "w",mkSimpleId "w'"] worldSort nullRange]
 
 -- Auxiliar function 1 
 fromSort :: [SORT] -> [VAR_DECL]
-fromSort ss = snd $ foldr f (0::Integer,[]) ss
-        where f s (i,xs) = (i+1,mkVarDecl (mkSimpleId ("x"++(show i))) s : xs)
+fromSort = snd . ( foldr f (0,[]) )
+        where 
+              f so (i,xs) = (i+1,mkVarDecl (str i) so : xs)
+              str i = mkSimpleId $ "x" ++ (show i)
 
 -- Auxiliar function 2
 fromDecls :: [VAR_DECL] -> [TERM f]
-fromDecls vs = concat $ fmap fromDecl vs 
+fromDecls = concat . (fmap fromDecl)
 
 -- Auxiliar function 3
 fromDecl :: VAR_DECL -> [TERM f]
