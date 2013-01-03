@@ -325,17 +325,28 @@ gnPCons n (PredType ts) = mkForall decls $ mkForall wA $ mkImpl f1 f2
 -- Generates a rigid constraint from a single op name and type
 -- We add the extra world argument in mkOpType so that it coincides
 -- with the later translated operation definition
+--gnOCons :: OP_NAME -> OpType -> CForm
+--gnOCons n (OpType o ts t) = mkForall decls $ mkForall y $ mkForall wA $ mkImpl f1 f2
+--        where f1 = mkStEq (mkAppl opName $ terms w1) y' 
+--              f2 = mkStEq (mkAppl opName $ terms w2) y' 
+--              y = [mkVarDecl (mkSimpleId "y") t]
+--              y' = Qual_var (mkSimpleId "y") t nullRange
+--              decls = fromSort ts
+--              terms = \x -> fromDecls $ x : decls
+--              opName = mkOpName n $ mkOpType o (worldSort:ts) t
+--              mkOpName n' t = Qual_op_name n' t nullRange
+--              mkOpType x y z = Op_type x y z nullRange
+
 gnOCons :: OP_NAME -> OpType -> CForm
-gnOCons n (OpType o ts t) = mkForall decls $ mkForall y $ mkForall wA $ mkImpl f1 f2
-        where f1 = mkStEq (mkAppl opName $ terms w1) y' 
-              f2 = mkStEq (mkAppl opName $ terms' w2) y' 
-              y = [mkVarDecl (mkSimpleId "y") t]
-              y' = Qual_var (mkSimpleId "y") t nullRange
-              decls = fromSort ts
-              terms = \x -> fromDecls $ x : decls
-              opName = mkOpName n $ mkOpType o (worldSort:ts) t
-              mkOpName n' t = Qual_op_name n' t nullRange
-              mkOpType x y z = Op_type x y z nullRange
+gnOCons n (OpType o ts t) = mkForall decls $ mkForall wA $ f
+          where f = mkStEq (mkAppl opName $ terms w1) t2
+                t2 = (mkAppl opName $ terms w2)
+                decls = fromSort ts
+                terms = \x -> fromDecls $ x : decls
+                opName = mkOpName n $ mkOpType o (worldSort:ts) t
+                mkOpName n' t' = Qual_op_name n' t' nullRange
+                mkOpType x y z = Op_type x y z nullRange
+
 
 
 -- The next functions are auxiliar. They are need for generating the
