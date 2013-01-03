@@ -77,14 +77,29 @@ instance Comorphism Hybrid2CASL
 -- theory in CASL form
 -- Question : Why some sentences are in the sig and other sentences are
 -- in the 2nd argument ? (this is scary)
+-- fs'' is needed for special sentences, refering about datatypes
+-- for which hybridization has nothing to do
 transTheory :: (HSign, [Named HForm]) -> Result (CSign, [Named CForm])
 transTheory (s,fs) = 
            let newSig = transSig s
                fs' = fmap (mapNamed trans) fs
-               newSens = fs' ++ sentences newSig
+               fs'' = dataTrans (fs ++ sentences s)
+               newSens = fs' ++ sentences newSig ++ fs''
                rigidP = applRig (rigidPreds $ extendedInfo s) "RigidPred" gnPCons 
                rigidO = applRig (rigidOps $ extendedInfo s) "RigidOp" gnOCons
                in return (newSig,rigidP ++ rigidO ++ newSens)
+
+-- Special formulas not covered by normal hybridization
+dataTrans :: [Named HForm] -> [Named CForm]
+dataTrans = foldr f []
+        where 
+        f a b = if sentence x == (Nothing :: Maybe HForm) then b
+                else mapNamed (\(Just x') -> x') x : b
+                where
+                        x = mapNamed f' a
+                        f' h = case h of 
+                                (Sort_gen_ax a' b') -> Just $ Sort_gen_ax a' b'
+                                _ -> Nothing 
 
 transSig :: HSign -> CSign
 transSig hs = let workflow = (transSens hs) . (addWrldArg hs) 
