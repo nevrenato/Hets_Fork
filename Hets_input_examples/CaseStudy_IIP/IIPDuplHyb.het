@@ -1,0 +1,35 @@
+logic Hybridize
+
+spec X = 
+        baselogic Hybridize
+
+        Basic_Spec {
+
+                baselogic Propositional
+
+                Basic_Spec { props p }
+
+                nominal Test,Off,Nor,Sus
+                modality Sus,Res,NotOk,Activate
+                
+                Test \/ Off \/ Nor \/ Sus
+                
+
+        }
+
+        nominal On,Off
+        modality TurnOn,TurnOff
+
+
+        On \/ Off;
+
+        @On { @Nor (<Sus> Sus /\ [Sus] Sus) /\ @Sus (<Res> Nor /\ [Res] Nor) };
+%%      @On { ( <Sus> true -> Nor /\ <Res> true -> Sus )  /\ not ( <NotOk> true \/ <Activate> true ) };
+        @Off { @Test (<NotOk> Off /\ [NotOk] Off) /\ @Off (<Activate> Test /\ [Activate] Test) };           
+%%      @Off { ( <NotOk> true -> Test /\ <Activate> true -> Off )  /\ not ( <Res> true \/ <Sus> true ) };
+        
+        Off /\ {Test} <-> ( <TurnOn> (On /\ {Nor}) /\ [TurnOn] (On /\ {Nor}) );
+%%        <TurnOn> true -> Off /\ {Test};
+
+        On /\ {Nor} <-> ( <TurnOff> (Off /\ {Off}) /\ [TurnOff] (Off /\ {Off}) )
+%%        <TurnOn> true -> Off /\ {Off}
