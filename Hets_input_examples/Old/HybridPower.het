@@ -1,0 +1,18 @@
+logic Hybrid
+
+spec Testing =
+	modalities M
+	nominal W
+	preds p,q : () 
+        . !X (p /\ q);
+        . @W (p /\ q);
+        . Here W /\ (p /\ q);
+        . !X Here X; %implied
+        . !X (Here X => <M> Here X);
+        . Here W => @W @W <M> Here W \/ p;
+        . p;
+        . Here W;
+        . !X <M> Here W; 
+        . @W p;             
+		
+end

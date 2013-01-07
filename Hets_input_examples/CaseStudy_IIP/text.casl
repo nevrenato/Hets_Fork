@@ -1,0 +1,33 @@
+logic CASL
+spec Nat =
+        free type Nat ::= 0 | suc(Nat)
+
+        . forall x,x' : Nat . x = x' %implied
+      
+%%        ops     
+%%                      __ + __ : Nat*Nat -> Nat
+%%                      __ - __ : Nat*Nat -> Nat
+%%        preds         __ < __ : Nat * Nat
+%%                      __ > __ : Nat * Nat
+%%                      __ <= __ : Nat * Nat
+%%                      __ >= __ : Nat * Nat
+
+%%        %%         +  
+%%        . forall n : Nat . 0 + n = n %(neutral)%
+%%        . forall n,n' : Nat . n + n' = n' + n %(commutativity)%
+%%%%        . forall n,n',n'' : Nat . (n + n') + n'' = n + (n' + n'') %(associativity)%
+%%        . forall n : Nat . suc(n) = n + suc(0) %(suc_with_plus)%
+%%%%        . forall n,m : Nat . suc(n) + m = suc(n + m)
+%%        %%         - 
+%%        . forall n,n' : Nat . n < n' => n - n' = 0 
+%%        . forall n,n' : Nat . n >= n' => exists m : Nat . n - n' = m /\ n = n' + m
+%%        
+%%%%                %% <,>,<=,>=
+%%          . forall n : Nat . n < suc(n)
+%%%%          . forall n,m : Nat . n < m <=> suc(n) < suc(m)
+%%          . forall n,n' : Nat . n < n' <=> n' > n
+%%          . forall n,n' : Nat . n <= n' <=> (n < n' \/ n = n') /\ (n' >= n)
+%%          . forall n,n' : Nat . n < n' <=> n <= n' /\ not n = n'
+%%          . forall n : Nat . n >= 0
+
+end

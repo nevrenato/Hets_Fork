@@ -1,0 +1,19 @@
+logic Hybridize
+
+spec X = 
+        baselogic Hybridize
+
+        Basic_Spec  {
+                baselogic Propositional
+                Basic_Spec {
+                        props p,q
+                        . p /\ q
+                }
+                nominal N
+                modality M
+                @ N {p}
+        }
+
+        nominal N'
+        modality M'
+        @ N'  [M'] { @ N <M> {q}} /\ {@ N {p}}

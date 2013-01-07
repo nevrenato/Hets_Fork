@@ -1,0 +1,20 @@
+logic Hybrid
+
+spec X =
+        sorts A,B,C
+        
+        rigid ops p : A
+                  q : A->B
+                  r : A*B->C
+                  s : A*B*C->B
+
+        ops       p' : A
+                  q' : A->B
+                  r' : A*B->C
+                  s' : A*B*C->B
+        
+        nominal N,N'
+      
+ %%       . not ( exists a : A,b : B . 
+ %%               @N q(a) = b /\ @N' not (q(a) = b) ) %implied 
+end 

@@ -1,0 +1,55 @@
+logic Hybrid
+
+spec Reconf_Calc = 
+        sort Nat
+        ops     
+                c : Nat                  %(Zero)%
+                suc : Nat -> Nat        %(Sucessor)%
+                pre : Nat -> Nat        %(Predecessor)%
+                x_op : Nat * Nat -> Nat %(Operation)%         
+        
+        nominals Sum,Mul
+        modalities Shift
+
+        %% global 
+
+        forall n,k,l : Nat 
+        . pre(suc(n)) = n       %(relation between pred and suc)%
+        . x_op(n,k) = x_op(k,n) %(commutativity)%
+        . x_op(n,x_op(k,l)) = x_op(x_op(n,k),l) %(associativity)%
+
+        %% state specific 
+        
+        forall n : Nat
+        . @Sum x_op(n,c) = n                    %(n + 0 = n)%
+        . @Sum suc(n) = x_op (n,suc(c))         %(suc n = n + 1)%
+        . @Mul x_op(n,c) = c                    %( n * 0 = 0 )%
+        . @Mul x_op(n,suc(c)) = n               %( n * 1 = n)%
+
+        %% dynamic       
+
+        forall n : Nat
+        . x_op(n,c) = n => [Shift] x_op(n,c) = c %( relation between modes 1)%
+        . @Sum <Shift> (Here Mul)                %( relation between modes 2)%
+        . @Mul <Shift> (Here Sum)                %( relation between modes 3)%
+ 
+        %% proving...
+
+         forall n,k : Nat
+        . pre(pre(suc(suc(n)))) = n
+                                       %% x * y = x + ((x-1)* y)
+        . exists l,m : Nat 
+                . ( @Mul x_op(suc(n),k) = l /\
+                    @Mul x_op(n,k) = m /\ 
+                    @Sum x_op(suc(n),m) = l ) %( x * y = x + ((x-1) * y) )%
+        . exists l,m : Nat 
+                . ( @Mul x_op(n,k) = l /\ 
+                    @Mul x_op(pre(n),k) = m /\ 
+                    @Sum x_op(n,m) = l ) %implied  %(x * y = x + ((x-1) * y) 2nd version%
+ 
+        . suc(n) = k => [Shift] pre(k) = n %implied     %(suc is the same in both modes)%
+
+        . exists l : Nat . @Sum x_op(n,c) = l /\ 
+                           @Mul x_op(n,suc(c)) = l %implied %( x+0 = x*1 )%
+        . exists l : Nat . @Sum x_op(n,n) = l /\ 
+                            @Mul x_op(suc(suc(c)),n) = l %implied  %(x+x = 2*x)%

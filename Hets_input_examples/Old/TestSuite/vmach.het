@@ -1,0 +1,14 @@
+logic Hybrid 
+
+spec VendingMachine = 
+	sort Product,Price
+	ops buy : Product -> Price;
+	    coffee : Product;
+	    tea : Product
+	preds bigger : Price * Price
+	nominals Day,Night
+	
+	%% a product is always more expensive at night
+	forall p : Product; r,r' : Price
+	. (@ Day buy(p) = r /\ @ Night buy(p) = r') => bigger(r',r) 
+

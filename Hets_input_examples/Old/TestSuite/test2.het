@@ -1,0 +1,41 @@
+logic Hybrid
+
+%% little harder formulas
+%% but still tautologies
+
+spec ax1 = 
+	pred p :()
+	modality M
+	. !X (<M> (Here X) /\ p) => (<M> p) %implied
+end
+
+
+spec aux = 
+	modality R 
+end
+
+spec ax2 =
+	aux then
+	pred p : ()
+	nominal N,M 
+	. @N [R]p /\ @N <R>(Here M) => @M p %implied
+end
+
+
+spec ax3 =
+	aux then
+	pred p : ()
+	nominal N 
+	. @N [R] p => @ N [R](!X @X p) %implied
+
+spec ax4 = 
+	aux then
+	pred p : ()
+	. !X ([R] p => @X [R] p) %implied
+
+spec ax5 = 
+	aux then
+	pred p : ()
+	nominal N 
+	. [R][R] p /\ <R> <R>(Here N) => @ N p %implied
+

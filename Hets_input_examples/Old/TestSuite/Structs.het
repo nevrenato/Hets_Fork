@@ -1,0 +1,34 @@
+logic Hybrid 
+
+spec Elem =
+        sort Elem
+end
+
+spec List[sort Elem] =
+        type List ::= empty | insert(Elem; List)
+end 
+
+spec Nomies =
+        nominal FIFO;LIFO
+end
+
+spec Ops =
+        List[Elem] then
+        ops pop : List -> List;
+            push : Elem * List -> List
+end 
+
+spec Behaviours = 
+        Nomies then
+        Ops then
+
+        forall e,e' : Elem; l,l' : List
+    	. pop(empty) = empty	
+	. empty = pop(empty)  %implied	
+	. pop(insert(e,empty)) = empty
+	. pop(insert(e,l)) = l
+	. push(e,empty) = insert(e,empty)
+	. @LIFO push(e,l) = insert(e,l)
+	. @FIFO push(e,insert(e',l)) = insert(e',push(e,l)) 
+	. @FIFO pop(l) = l' <=> @LIFO pop(l) = l' %implied
+end
