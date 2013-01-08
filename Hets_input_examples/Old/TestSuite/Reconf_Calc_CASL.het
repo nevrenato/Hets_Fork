@@ -1,0 +1,91 @@
+logic CASL.FOL=
+sorts Nat, World
+op Wrl_Mul : World
+op Wrl_Sum : World
+op c : World -> Nat
+op pre : World * Nat -> Nat
+op suc : World * Nat -> Nat
+op x_op : World * Nat * Nat -> Nat
+pred Acc_Shift : World * World
+
+forall w : World . forall n : Nat . pre(w, suc(w, n)) = n %(Ax1)%
+
+forall w : World
+. forall n, k : Nat . x_op(w, n, k) = x_op(w, k, n)
+                                                 %(commutativity)%
+
+forall w : World
+. forall n, k, l : Nat
+  . x_op(w, n, x_op(w, k, l)) = x_op(w, x_op(w, n, k), l)
+                                                 %(associativity)%
+
+forall w : World
+. forall n : Nat . x_op(Wrl_Sum, n, c(Wrl_Sum)) = n  %(n + 0 = n)%
+
+forall w : World
+. forall n : Nat
+  . suc(Wrl_Sum, n) = x_op(Wrl_Sum, n, suc(Wrl_Sum, c(Wrl_Sum)))
+                                                 %(suc n = n + 1)%
+
+forall w : World
+. forall n : Nat . x_op(Wrl_Mul, n, c(Wrl_Mul)) = c(Wrl_Mul)
+                                                     %(n * 0 = 0)%
+
+forall w : World
+. forall n : Nat . x_op(Wrl_Mul, n, suc(Wrl_Mul, c(Wrl_Mul))) = n
+                                                     %(n * 1 = n)%
+
+forall w : World
+. forall n : Nat
+  . x_op(w, n, c(w)) = n
+    => forall v0 : World
+       . Acc_Shift(w, v0) => x_op(v0, n, c(v0)) = c(v0)
+                                      %(relation between modes 1)%
+
+forall w : World
+. not forall v0 : World
+      . Acc_Shift(Wrl_Sum, v0) => not Wrl_Mul = v0
+                                      %(relation between modes 2)%
+
+forall w : World
+. not forall v0 : World
+      . Acc_Shift(Wrl_Mul, v0) => not Wrl_Sum = v0
+                                      %(relation between modes 3)%
+
+forall w : World
+. forall n : Nat . pre(w, pre(w, suc(w, suc(w, n)))) = n
+                                                  %(ind)% %implied
+
+forall w : World
+. forall n, k : Nat
+  . suc(w, n) = k
+    => forall v0 : World . Acc_Shift(w, v0) => pre(v0, k) = n
+                        %(suc is the same in both modes)% %implied
+
+forall w : World
+. forall n, k : Nat
+  . exists l, m : Nat
+    . x_op(Wrl_Mul, suc(Wrl_Mul, n), k) = l /\ x_op(Wrl_Mul, n, k) = m
+      /\ x_op(Wrl_Sum, suc(Wrl_Sum, n), m) = l
+                                       %(x * y = x + ((x-1) * y))%
+
+forall w : World
+. forall n, k : Nat
+  . exists l, m : Nat
+    . x_op(Wrl_Mul, n, k) = l /\ x_op(Wrl_Mul, pre(Wrl_Mul, n), k) = m
+      /\ x_op(Wrl_Sum, n, m) = l
+                  %(x * y = x + ((x-1) * y) 2nd version)% %implied
+
+forall w : World
+. forall n : Nat
+  . exists l : Nat
+    . x_op(Wrl_Sum, n, c(Wrl_Sum)) = l
+      /\ x_op(Wrl_Mul, n, suc(Wrl_Mul, c(Wrl_Mul))) = l
+                                            %(x+0 = x*1)% %implied
+
+forall w : World
+. forall n : Nat
+  . exists l : Nat
+    . x_op(Wrl_Sum, n, n) = l
+      /\ x_op(Wrl_Mul, suc(Wrl_Mul, suc(Wrl_Mul, c(Wrl_Mul))), n) = l
+                                            %(x+x = 2*x)% %implied
