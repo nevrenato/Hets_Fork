@@ -48,7 +48,9 @@ data TH_FORMULA f = At NOMINAL (TH_FORMULA f)
                   | BiImplication (TH_FORMULA f) (TH_FORMULA f) 
                   | Here NOMINAL
                   | Neg (TH_FORMULA f)
-                  | Par (TH_FORMULA f) 
+                  | Par (TH_FORMULA f)
+                  | TrueA
+                  | FalseA 
                     deriving (Show, Eq, Ord)
 
 -- Existential quantification is used, in the Sentences, Spec and Signature

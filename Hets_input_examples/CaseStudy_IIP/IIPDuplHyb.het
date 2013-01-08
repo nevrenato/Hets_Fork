@@ -12,6 +12,7 @@ spec X =
                 nominal Test,Off,Nor,Sus
                 modality Sus,Res,NotOk,Activate
                 
+                %% The possible sub states
                 Test \/ Off \/ Nor \/ Sus
                 
 
@@ -20,16 +21,22 @@ spec X =
         nominal On,Off
         modality TurnOn,TurnOff
 
-
+        %% The possible super states
         On \/ Off;
 
-        @On { @Nor (<Sus> Sus /\ [Sus] Sus) /\ @Sus (<Res> Nor /\ [Res] Nor) };
-%%      @On { ( <Sus> true -> Nor /\ <Res> true -> Sus )  /\ not ( <NotOk> true \/ <Activate> true ) };
-        @Off { @Test (<NotOk> Off /\ [NotOk] Off) /\ @Off (<Activate> Test /\ [Activate] Test) };           
-%%      @Off { ( <NotOk> true -> Test /\ <Activate> true -> Off )  /\ not ( <Res> true \/ <Sus> true ) };
-        
-        Off /\ {Test} <-> ( <TurnOn> (On /\ {Nor}) /\ [TurnOn] (On /\ {Nor}) );
-%%        <TurnOn> true -> Off /\ {Test};
 
-        On /\ {Nor} <-> ( <TurnOff> (Off /\ {Off}) /\ [TurnOff] (Off /\ {Off}) )
-%%        <TurnOn> true -> Off /\ {Off}
+        %% Defining and restricting relations between the sub states in the super state On
+        @On { @Nor <Sus>" Sus /\ @Sus <Res>" Nor }; 
+        @On { ( <Sus> true -> Nor /\ <Res> true -> Sus )  /\ not ( <NotOk> true \/ <Activate> true ) };
+        
+        %% Defining and restricting relations between the sub states in the super state Off
+        @Off { @Test <NotOk>" Off /\ @Off <Activate>" Test} ;
+        @Off { ( <NotOk> true -> Test /\ <Activate> true -> Off )  /\ not ( <Res> true \/ <Sus> true ) };
+       
+
+        %% Defining and restricting relations between the super and sub states 
+        Off /\ {Test} <-> ( <TurnOn>" (On /\ {Nor}) );
+        <TurnOn> true -> Off /\ {Test};
+
+        On /\ {Nor} <-> ( <TurnOff>" (Off /\ {Off})  );
+        <TurnOn> true -> Off /\ {Off}

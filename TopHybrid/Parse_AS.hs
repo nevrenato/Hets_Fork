@@ -127,12 +127,27 @@ fParser l bs =
         f <- (fParser l bs <|> topParser l bs )
         return $ Box m f
         <|>
+        try (do
+        asKey "<"
+        m <- simpleId
+        asKey ">\""
+        f <- (fParser l bs <|> topParser l bs)
+        return $ Par $ Conjunction (Dia m f) (Box m f)) 
+        <|>
         do 
         asKey "<"
         m <- simpleId
         asKey ">"
         f <- ( fParser l bs <|> topParser l bs)
         return $ Dia m f
+        <|>
+        do
+        asKey "true"
+        return TrueA
+        <|>
+        do
+        asKey "false"
+        return FalseA
         <|>
         do 
         n <- simpleId

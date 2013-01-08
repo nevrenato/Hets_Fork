@@ -48,7 +48,9 @@ data TH_FORMULA f = At NOMINAL (TH_FORMULA f)
                   | BiImplication (TH_FORMULA f) (TH_FORMULA f) 
                   | Here NOMINAL
                   | Neg (TH_FORMULA f)
-                  | Par (TH_FORMULA f) 
+                  | Par (TH_FORMULA f)
+                  | TrueA
+                  | FalseA 
                     deriving (Show, Eq, Ord)
 
 -- Existential quantification is used, in the Sentences, Spec and Signature
@@ -135,6 +137,8 @@ instance GetRange f => GetRange (TH_FORMULA f) where
     Here a -> joinRanges [rangeSpan a]
     Neg a -> joinRanges [rangeSpan a]
     Par a -> joinRanges [rangeSpan a]
+    TrueA -> []
+    FalseA -> []
 
 instance GetRange Mor where
   getRange = const nullRange

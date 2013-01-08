@@ -42,6 +42,8 @@ instance (Pretty f) => Pretty (TH_FORMULA f) where
         pretty (Here n) = pretty n
         pretty (Neg f) = keyword "not" <+> (pretty f)
         pretty (Par f) = keyword "(" <+> (pretty f) <+> (keyword ")")
+        pretty TrueA = keyword "True"
+        pretty FalseA = keyword "False"
 
 instance (Pretty s) => Pretty (THybridSign s) where
         pretty x@(THybridSign _ _ s) =    
