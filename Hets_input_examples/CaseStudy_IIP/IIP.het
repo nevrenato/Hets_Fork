@@ -125,47 +125,52 @@ nominals BnBo,BtBo,Su1,Su2,Bn,Bt
 
 end
 
-
 spec Nat = 
+         sort Nat
 
-%%      free type Nat ::= 0 | suc(Nat)
-
-        sort Nat
-
-        rigid ops 0 : Nat
-              suc : Nat -> Nat
+         rigid ops 
+                        0 : Nat
+                        suc : Nat -> Nat
  
-        . forall n : Nat . n = 0 \/ exists n' : Nat . n = suc(n') %(def_gen)%
+         forall n,m : Nat  
+                  . n = 0 \/ exists n' : Nat . n = suc(n') /\ not n = n' %(def_gen)%
+                  . not suc(n) = 0
+                  . suc(n) = suc(m) => n = m
 
-     
         rigid ops     
-              __ + __ : Nat*Nat -> Nat
-              __ - __ : Nat*Nat -> Nat
+                        __ + __ : Nat*Nat -> Nat
+                        __ - __ : Nat*Nat -> Nat
         rigid preds         
-              __ < __ : Nat * Nat
-              __ > __ : Nat * Nat
-              __ <= __ : Nat * Nat
-              __ >= __ : Nat * Nat
+                        __ < __ : Nat * Nat
+                        __ > __ : Nat * Nat
+                        __ <= __ : Nat * Nat
+                        __ >= __ : Nat * Nat
 
                 %% + %%
         forall n,n',n'' : Nat 
         . 0 + n = n %(neutral)%
         . n + n' = n' + n %(commutativity)%
-%%      . (n + n') + n'' = n + (n' + n'') %(associativity)%
-%%      . suc(n) = n + suc(0) %(suc_with_plus)%
-%%      . suc(n) + n' = suc(n + n')
+        . (n + n') + n'' = n + (n' + n'') %(associativity)%
+
+                %% suc && + %%
+        . suc(n) = n + suc(0) %(suc_with_plus)%
+        . suc(n) + n' = suc(n + n')
+
                 %% - %%
         . n < n' => n - n' = 0 
         . n >= n' => exists m : Nat . n - n' = m /\ n = n' + m
         
-                %% <,>,<=,>=
+                %% order relations %%
+
         forall n,n',n'' : Nat
-        . n < suc(n)
+        . n < n' => n + n'' < n' + n''
+        . exists m : Nat . (m = n \/ n < m) /\ suc(m) = n' => n' > n
+        . n < n' /\ n' < n'' => n < n''
+        . not n < n        
         . n < n' <=> n' > n
+        
         . n <= n' <=> (n < n' \/ n = n') /\ (n' >= n)
-        . n < n' <=> n <= n' /\ not n = n'
-        . n < n' <=> suc(n) < suc(n')
-        . n' >= n => n' + n'' >= n %implied %(yup)%
+
 end
 
 spec IIP_low =
@@ -231,7 +236,9 @@ spec IIP_low =
                 . @Bn ins_bolus(t) <= max_flow %implied %(onlyBolus)%
                 . @Bn cur_flow(t) >= basal(t) %implied %(atleastbasal)%
                 . @Bn ins_bolus(t) > 0 => cur_flow(t) > cur_flow(suc(t)) %implied %(afterInsBolus)%
+                . not (basal(t) > 0 /\ tbasal(t) > 0) %implied 
                 . exists n,n' : Nat. @Su1 ( cur_flow(t) = n /\ <Res> cur_flow(t) = n' /\ not n > n' ) %implied %(afterSus)%
+                . forall n : Nat . @Su1 cur_flow(t) = n => cur_flow(t) >= n %implied %(theflowistheleastpossible)%
 end
 
 spec IIP_low_Alarm =
@@ -255,4 +262,6 @@ spec IIP_low_Alarm =
                  (exists t1,t2 : Nat . (t2 - t1 >= max_timeS) /\ (t >= t1 /\ t <= t2) /\ 
                           forall t' : Nat . (t' >= t1 /\ t' <= t2) => cur_flow(t') = 0) => alarm(t) > 0
 
+       
+        forall t : Nat . alarm(t) = 0 %implied %(a stupid thing)% 
         end
