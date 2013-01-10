@@ -274,7 +274,6 @@ spec IIP_low =
                 . @Bn ins_bolus(t) > 0 => cur_flow(t) > cur_flow(suc(t)) %implied %(afterInsBolus)%
                 . exists n,n' : Nat. @Su1 ( cur_flow(t) = n /\ <Res> cur_flow(t) = n' /\ not n > n' ) %implied %(afterSus)%
                 . forall n : Nat . @Su1 cur_flow(t) = n => cur_flow(t) >= n %implied %(theflowistheleastpossible)%
-                . cur_flow(t) > max_flow %implied %(contradiction)%
 end
 
 spec IIP_low_Alarm =
