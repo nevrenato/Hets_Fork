@@ -197,13 +197,14 @@ spec HNat =
 
         forall a,b : Nat
         . a <= b <=> a - b = 0
-        . a > b <=> exists c : Nat . a - b = c <=> a = b + c
-
+        . a > b <=> (exists c : Nat . (a - b = c <=> a + c = b) /\ c > 0)
+        
         forall a : Nat
         . suc(a) = a + suc(0) %implied %(defSuc)% 
         . suc(a) - a = suc(0) %implied %(The2ndleastdifference)%
         . (a + a) - a = a %implied %(1stSubNeutral)%
         . a - 0 = a %implied %(2ndSubNeutral)%
+
 end
 
 
