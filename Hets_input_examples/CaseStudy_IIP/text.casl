@@ -15,7 +15,7 @@ spec Nat =
  
          forall n : Nat . not suc(n) = n %implied %(notreflexive)% %%passed
          
-         . exists n : Nat . true %implied %(atLeastOne)% %%passed
+         . exists n : Nat . n = n %implied %(atLeastOne)% %%passed
         
          . exists n,n' : Nat . not n = n' %implied %(atLeastTwo)% 
 
@@ -45,39 +45,40 @@ spec Nat =
         . a + c < b => a < b %implied %(sumAlwaysAdds3rd)%
         . not a = 0 => 0 < a %implied %(0isthelowestNat)%
 
-        pred __ > __ : Nat*Nat
+          pred __ > __ : Nat*Nat
+  
+          forall a,b : Nat
+          . a < b <=> b > a
+ 
+          pred __ <= __ : Nat*Nat
+  
+          forall a,b : Nat
+          . a <= b <=> a < b \/ a = b
+ 
+          pred __ >= __ : Nat*Nat
+         
+          forall a,b : Nat
+          . a >= b <=> a > b \/ a = b
 
-        forall a,b : Nat
-        . a < b <=> b > a
-
-        pred __ <= __ : Nat*Nat
-
-        forall a,b : Nat
-        . a <= b <=> a < b \/ a = b
-
-        pred __ >= __ : Nat*Nat
+          forall a,b,c : Nat
+          . a >= b <=> b <= a %implied %(BigEqAsTheSymOfLesEq)% 
+          . a >= b => not a < b %implied %(RelBigEqWithLes)%
+          . a >= b => a+c >= b %implied %(sumAlwaysAdds4th)%
+          . a >= b /\ c > 0 => a+c > b %implied %(sumAlwaysAdds5th)% 
+          . not ((a > b) /\ (a <= b)) %implied %(onlyoneHypo)%      
         
-        forall a,b : Nat
-        . a >= b <=> a > b \/ a = b
+          op __ - __ : Nat*Nat -> Nat
 
-        forall a,b,c : Nat
-        . a >= b <=> b <= a %implied %(BigEqAsTheSymOfLesEq)% 
-        . a >= b => not a < b %implied %(RelBigEqWithLes)%
-        . a >= b => a+c >= b %implied %(sumAlwaysAdds4th)%
-        . a >= b /\ c > 0 => a+c > b %implied %(sumAlwaysAdds5th)% 
+          forall a,b : Nat
+          . a <= b <=> a - b = 0
+          . a > b <=> (exists c : Nat . (a - b = c <=> a + c = b) /\ c > 0)
 
-        op __ - __ : Nat*Nat -> Nat
-
-        forall a,b : Nat
-        . a <= b <=> a - b = 0
-        . a > b <=> exists c : Nat . a - b = c <=> a = b + c
-
-        forall a : Nat
-        . suc(a) = a + suc(0) %implied %(defSuc)% 
-        . suc(a) - a = suc(0) %implied %(The2ndleastdifference)%
-        . (a + a) - a = a %implied %(1stSubNeutral)%
-        . a - 0 = a %implied %(2ndSubNeutral)%
-
+          forall a : Nat
+          . suc(a) = a + suc(0) %implied %(defSuc)% 
+          . suc(a) - a = suc(0) %implied %(The2ndleastdifference)%
+          . (a + a) - a = a %implied %(1stSubNeutral)%
+          . a - 0 = a %implied %(2ndSubNeutral)%
+ 
 end
 
 logic Hybrid
@@ -154,8 +155,8 @@ spec HNat =
 
         forall a,b : Nat
         . a <= b <=> a - b = 0
-        . a > b <=> exists c : Nat . a - b = c <=> a = b + c
-
+        . a > b <=> (exists c : Nat . (a - b = c <=> a + c = b) /\ c > 0)
+        
         forall a : Nat
         . suc(a) = a + suc(0) %implied %(defSuc)% 
         . suc(a) - a = suc(0) %implied %(The2ndleastdifference)%

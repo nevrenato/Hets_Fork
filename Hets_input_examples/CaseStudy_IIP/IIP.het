@@ -125,53 +125,87 @@ nominals BnBo,BtBo,Su1,Su2,Bn,Bt
 
 end
 
-spec Nat = 
+spec HNat =
+
          sort Nat
 
          rigid ops 
-                        0 : Nat
-                        suc : Nat -> Nat
- 
-         forall n,m : Nat  
-                  . n = 0 \/ exists n' : Nat . n = suc(n') /\ not n = n' %(def_gen)%
+                  0 : Nat
+                  suc : Nat -> Nat
+         
+         forall n,m : Nat
+                  . n = 0 \/ exists n' : Nat . n = suc(n') /\ not n = n'
                   . not suc(n) = 0
                   . suc(n) = suc(m) => n = m
-
-        rigid ops     
-                        __ + __ : Nat*Nat -> Nat
-                        __ - __ : Nat*Nat -> Nat
-        rigid preds         
-                        __ < __ : Nat * Nat
-                        __ > __ : Nat * Nat
-                        __ <= __ : Nat * Nat
-                        __ >= __ : Nat * Nat
-
-                %% + %%
-        forall n,n',n'' : Nat 
-        . 0 + n = n %(neutral)%
-        . n + n' = n' + n %(commutativity)%
-        . (n + n') + n'' = n + (n' + n'') %(associativity)%
-
-                %% suc && + %%
-        . suc(n) = n + suc(0) %(suc_with_plus)%
-        . suc(n) + n' = suc(n + n')
-
-                %% - %%
-        . n < n' => n - n' = 0 
-        . n >= n' => exists m : Nat . n - n' = m /\ n = n' + m
+ 
+         forall n : Nat . not suc(n) = n %implied %(notreflexive)% %%passed
+         
+         . exists n : Nat . true %implied %(atLeastOne)% %%passed
         
-                %% order relations %%
+         . exists n,n' : Nat . not n = n' %implied %(atLeastTwo)% 
 
-        forall n,n',n'' : Nat
-        . n < n' => n + n'' < n' + n''
-        . exists m : Nat . (m = n \/ n < m) /\ suc(m) = n' => n' > n
-        . n < n' /\ n' < n'' => n < n''
-        . not n < n        
-        . n < n' <=> n' > n
+         rigid ops    __+__ : Nat*Nat -> Nat
+ 
+         forall n,n',n'' : Nat
+         . n + 0 = n
+         . n + suc(n') = suc(n + n')
+         . n + n' = n' + n
+         . n + ( n' + n'') = ( n + n') + n''
         
-        . n <= n' <=> (n < n' \/ n = n') /\ (n' >= n)
+        
+         . forall n : Nat . 0 + n = n %implied %(neutralCommu)%
 
+
+        rigid pred __ < __ : Nat*Nat
+
+        forall a,b,c : Nat
+        . not a < a
+        . a < b => not b < a
+        . a < b /\ b < c => a < b
+        . a < b <=> exists d : Nat . not d = 0 /\ a + d = b 
+        
+        . a < suc(a) %implied %(sucBigger)% %%proved with eprover 
+        . a < b => (a + c) < (b + c) %%(sumAlwaysAdds)% %%can be proved in CASL
+        . a < b => a < b + c %(sumAlwaysAdds2nd)% %%can be proved in CASL
+        . a + c < b => a < b %(sumAlwaysAdds3rd)% %%can be proved in CASL
+        . not a = 0 => 0 < a %implied %(0isthelowestNat)% %%can be proved here
+
+
+        rigid pred __ > __ : Nat*Nat
+        
+        forall a,b : Nat
+        . a < b <=> b > a
+
+        rigid pred __ <= __ : Nat*Nat
+
+        forall a,b : Nat
+        . a <= b <=> a < b \/ a = b
+
+        rigid pred __ >= __ : Nat*Nat
+        
+        forall a,b : Nat
+        . a >= b <=> a > b \/ a = b
+
+        forall a,b,c : Nat
+        . a >= b <=> b <= a %implied %(BigEqAsTheSymOfLesEq)%
+        . a >= b => not a < b %implied %(RelBigEqWithLes)%
+        . a >= b => a+c >= b %implied %(sumAlwaysAdds4th)% 
+        . a >= b /\ c > 0 => a+c > b %implied %(sumAlwaysAdds5th)%  
+
+
+        rigid op __ - __ : Nat*Nat -> Nat
+
+        forall a,b : Nat
+        . a <= b <=> a - b = 0
+        . a > b <=> exists c : Nat . a - b = c <=> a = b + c
+
+        forall a : Nat
+        . suc(a) = a + suc(0) %implied %(defSuc)% 
+        . suc(a) - a = suc(0) %implied %(The2ndleastdifference)%
+        . (a + a) - a = a %implied %(1stSubNeutral)%
+        . a - 0 = a %implied %(2ndSubNeutral)%
 end
+
 
 spec IIP_low =
 
@@ -180,7 +214,7 @@ spec IIP_low =
         %% The requirements nº5 and 6, refer to external factors, hence we cannot model them in a natural way
         %% The requirements listed include the spec below
 
-        Nat then
+        HNat then
         IIP_low_KripkeF then
         
 
@@ -213,6 +247,7 @@ spec IIP_low =
             . @Su2 cur_flow(t) = 0 
 
         
+ 
         %% A temporary basal cannot last more than x minutes nº16
         . forall t : Nat .
                  not ( exists t1,t2 : Nat . (t2 - t1 >= max_time) /\ (t >= t1 /\ t <= t2) /\
@@ -228,7 +263,7 @@ spec IIP_low =
         . forall t : Nat . not ext_bolus(suc(t)) = 0 => ext_bolus(t) = 0 \/ ext_bolus(t) = ext_bolus(suc(t)) 
    
         %% At any time the accumulated rate, can never be superior to the maximum rate established nº23
-        . forall t : Nat . cur_flow(t) <= max_flow %% can we deduce this ? 
+        . forall t : Nat . cur_flow(t) <= max_flow 
        
         %% Properties 
         forall t : Nat
@@ -236,9 +271,9 @@ spec IIP_low =
                 . @Bn ins_bolus(t) <= max_flow %implied %(onlyBolus)%
                 . @Bn cur_flow(t) >= basal(t) %implied %(atleastbasal)%
                 . @Bn ins_bolus(t) > 0 => cur_flow(t) > cur_flow(suc(t)) %implied %(afterInsBolus)%
-                . not (basal(t) > 0 /\ tbasal(t) > 0) %implied 
                 . exists n,n' : Nat. @Su1 ( cur_flow(t) = n /\ <Res> cur_flow(t) = n' /\ not n > n' ) %implied %(afterSus)%
                 . forall n : Nat . @Su1 cur_flow(t) = n => cur_flow(t) >= n %implied %(theflowistheleastpossible)%
+                . cur_flow(t) > max_flow %implied %(contradiction)%
 end
 
 spec IIP_low_Alarm =
@@ -262,6 +297,4 @@ spec IIP_low_Alarm =
                  (exists t1,t2 : Nat . (t2 - t1 >= max_timeS) /\ (t >= t1 /\ t <= t2) /\ 
                           forall t' : Nat . (t' >= t1 /\ t' <= t2) => cur_flow(t') = 0) => alarm(t) > 0
 
-       
-        forall t : Nat . alarm(t) = 0 %implied %(a stupid thing)% 
         end
