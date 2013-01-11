@@ -205,6 +205,9 @@ spec HNat =
         . (a + a) - a = a %implied %(1stSubNeutral)%
         . a - 0 = a %implied %(2ndSubNeutral)%
 
+        forall a,b,c : Nat
+        . a + b <= c => a <= c %implied %(Inclusion)%
+
 end
 
 
@@ -268,6 +271,8 @@ spec IIP_low =
        
         %% Properties 
         forall t : Nat
+                . @Bn cur_flow(t) <= max_flow %implied %(helper1)%
+                . @Bn basal(t) + ins_bolus(t) <= max_flow %implied %(helper2)%
                 . @Bn basal(t) <= max_flow %implied %(onlyBasal)%
                 . @Bn ins_bolus(t) <= max_flow %implied %(onlyBolus)%
                 . @Bn cur_flow(t) >= basal(t) %implied %(atleastbasal)%

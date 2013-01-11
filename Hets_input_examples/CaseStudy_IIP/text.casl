@@ -78,7 +78,10 @@ spec Nat =
           . suc(a) - a = suc(0) %implied %(The2ndleastdifference)%
           . (a + a) - a = a %implied %(1stSubNeutral)%
           . a - 0 = a %implied %(2ndSubNeutral)%
- 
+
+          forall a,b,c : Nat
+          . a + b <= c => a <= c %implied %(Inclusion)%
+
 end
 
 logic Hybrid
@@ -162,6 +165,9 @@ spec HNat =
         . suc(a) - a = suc(0) %implied %(The2ndleastdifference)%
         . (a + a) - a = a %implied %(1stSubNeutral)%
         . a - 0 = a %implied %(2ndSubNeutral)%
+
+        forall a,b,c : Nat
+        . a + b <= c => a <= c %implied %(Inclusion)%
 
 end
 
