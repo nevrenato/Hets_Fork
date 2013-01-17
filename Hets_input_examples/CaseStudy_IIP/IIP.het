@@ -253,12 +253,6 @@ spec IIP_low =
         
  
         %% A temporary basal cannot last more than x minutes nº16
-        . forall t : Nat .
-                 not ( exists t1,t2 : Nat . (t2 - t1 >= max_time) /\ (t >= t1 /\ t <= t2) /\
-                          forall t' : Nat . (t' >= t1 /\ t' <= t2) => 
-                                  cur_flow(t') = tbasal(t') + ins_bolus(t') \/
-                                  cur_flow(t') = tbasal(t') + ext_bolus(t')) 
-
 
         %% The normal bolus must be instantaneous nº20
         . forall t : Nat . not (ins_bolus(suc(t)) = 0) => ins_bolus(suc(suc(t))) = 0 /\ ins_bolus(t) = 0 
@@ -276,9 +270,12 @@ spec IIP_low =
                 . @Bn basal(t) <= max_flow %implied %(onlyBasal)%
                 . @Bn ins_bolus(t) <= max_flow %implied %(onlyBolus)%
                 . @Bn cur_flow(t) >= basal(t) %implied %(atleastbasal)%
-                . @Bn ins_bolus(t) > 0 => cur_flow(t) > cur_flow(suc(t)) %implied %(afterInsBolus)%
                 . exists n,n' : Nat. @Su1 ( cur_flow(t) = n /\ <Res> cur_flow(t) = n' /\ not n > n' ) %implied %(afterSus)%
                 . forall n : Nat . @Su1 cur_flow(t) = n => cur_flow(t) >= n %implied %(theflowistheleastpossible)%
+                . @BnBo cur_flow(t) >= basal(t) %implied %(helper3)%
+                . @Bt cur_flow(t) >= tbasal(t) %implied %(helper4)%
+                . @BtBo cur_flow(t) >= tbasal(t) %implied %(helper5)%
+                . not (Here Su1 \/ Here Su2) => cur_flow(t) >= basal(t) \/ cur_flow(t) >= tbasal(t) %implied %(mustbeworking)%
 end
 
 spec IIP_low_Alarm =
@@ -293,9 +290,8 @@ spec IIP_low_Alarm =
                   max_timeS : Nat %% The maximum time, that the pump can be in a suspended state 
 
         %% when the insulin reservoir is low, a periodic alarm should be sound nº4
-        %% requirement rewritten : only when the insulin reservoir is low ...
         %% This axiom assumes that the alarm triggers in the same instant, that the low_threshold is detected
-        . forall t : Nat . (res (t) < low_thres => alarm(t) > 0) /\ not (res(t) < low_thres) => alarm(t) = 0         
+        . forall t : Nat . (res (t) < low_thres => alarm(t) > 0) 
 
         %% If the pump is more than x minutes in the suspended state, a periodic alarm should be sounded nº11
         . forall t : Nat . 
