@@ -24,7 +24,6 @@ spec X =
         %% The possible super states
         On \/ Off;
 
-
         %% Defining and restricting relations between the sub states in the super state On
         @On { @Nor <Sus>" Sus /\ @Sus <Res>" Nor }; 
         @On { ( <Sus> true -> Nor /\ <Res> true -> Sus )  /\ not ( <NotOk> true \/ <Activate> true ) };
@@ -40,3 +39,9 @@ spec X =
 
         On /\ {Nor} <-> ( <TurnOff>" (Off /\ {Off})  );
         <TurnOn> true -> Off /\ {Off}
+
+
+        %% properties that may be proved
+%%      {@Nor <Sus><Res> Nor} <-> On; %implied
+%%      @On {Nor} -> <TurnOff>({<TurnOn>Test} /\ ({Test} -> <Ok>On)) %implied
+        

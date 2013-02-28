@@ -192,15 +192,17 @@ trForm a s b = case (a,b) of
                      (w, Quantification q l f _) -> mkQua q l $ trForm w s f
                      (w, Equivalence f f' _) -> mkEq (trForm w s f) $ trForm w s f'
                      (w, Strong_equation t t' _) -> mkStEq (trTerm w s t) (trTerm w s t')
+                     (w, Existl_equation t t' _) -> mkExEq (trTerm w s t) (trTerm w s t')
                      (_, True_atom _) -> mkTrue
                      (_, False_atom _) -> mkFalse
-                     _ -> mkTrue
+                     (w, Definedness t _) -> Definedness (trTerm w s t) nullRange
                 where mkConj l = Conjunction l nullRange
                       mkDisj l = Disjunction l nullRange
                       mkQua q l f = Quantification q l f nullRange
                       mkEq f f' = Equivalence f f' nullRange
                       mkTrue = True_atom nullRange
                       mkFalse = False_atom nullRange
+                      mkExEq t t' = Existl_equation t t' nullRange
 
 -- | Alpha function, translates pure Hybrid Formulas
 alpha :: Mode -> [String] -> H_FORMULA -> CForm

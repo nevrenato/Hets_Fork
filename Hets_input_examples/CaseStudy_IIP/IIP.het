@@ -1,4 +1,3 @@
-
 logic Hybrid
 
 spec IIP_top =
@@ -213,10 +212,6 @@ end
 
 spec IIP_low =
 
-        %% requirements alread met with the imports : 1,2,3,10,17,18
-        %% requirements met so far : 1,2,3,4,7,8,9,10(in kripke models above),12,13,11
-        %% The requirements nº5 and 6, refer to external factors, hence we cannot model them in a natural way
-        %% The requirements listed include the spec below
 
         HNat then
         IIP_low_KripkeF then
@@ -227,7 +222,6 @@ spec IIP_low =
                   max_flow : Nat %% max flow of insulin permitted
                   max_time : Nat %% the maximum time the pump can be in basal temporary
                   basal : Nat -> Nat %% The basal application, in later instances we could turn it in a pred
-                  %% requirements nº12 and 13 are met, because is a function (simple and total). 22 (rigid)
 
                   tbasal : Nat -> Nat %% The basal temporary, in later instances we could turn it in a pred
                   ext_bolus : Nat -> Nat %% The extended bolus profile
@@ -236,66 +230,93 @@ spec IIP_low =
                   cur_flow : Nat -> Nat %% the current flow of insulin
 
                         
-        %% basal profile must be valid
-        %% basal_temporary must be valid
-
-        %% For each state, the insulin methods that are active
-        %% Requirements met here : 7,8,9,14,15,19
-
         forall t : Nat 
-            . @Bn cur_flow(t) = basal(t) + ins_bolus(t)
+            . @Bn cur_flow(t) = basal(t) 
             . @BnBo cur_flow(t) = basal(t) + ext_bolus(t)
-            . @Bt cur_flow(t) = tbasal(t) + ins_bolus(t)
+            . @Bt cur_flow(t) = tbasal(t) 
             . @BtBo cur_flow(t) = tbasal(t) + ext_bolus(t)
             . @Su1 cur_flow(t) = 0
             . @Su2 cur_flow(t) = 0 
 
         
  
-        %% A temporary basal cannot last more than x minutes nº16
 
         %% The normal bolus must be instantaneous nº20
-        . forall t : Nat . not (ins_bolus(suc(t)) = 0) => ins_bolus(suc(suc(t))) = 0 /\ ins_bolus(t) = 0 
+%%        . forall t : Nat . not (ins_bolus(suc(t)) = 0) => ins_bolus(suc(suc(t))) = 0 /\ ins_bolus(t) = 0 
 
         %% The extended bolus must be constant along time nº21
-        . forall t : Nat . not ext_bolus(suc(t)) = 0 => ext_bolus(t) = 0 \/ ext_bolus(t) = ext_bolus(suc(t)) 
+%%        . forall t : Nat . not ext_bolus(suc(t)) = 0 => ext_bolus(t) = 0 \/ ext_bolus(t) = ext_bolus(suc(t)) 
    
-        %% At any time the accumulated rate, can never be superior to the maximum rate established nº23
         . forall t : Nat . cur_flow(t) <= max_flow 
        
         %% Properties 
         forall t : Nat
                 . @Bn cur_flow(t) <= max_flow %implied %(helper1)%
-                . @Bn basal(t) + ins_bolus(t) <= max_flow %implied %(helper2)%
                 . @Bn basal(t) <= max_flow %implied %(onlyBasal)%
-                . @Bn ins_bolus(t) <= max_flow %implied %(onlyBolus)%
                 . @Bn cur_flow(t) >= basal(t) %implied %(atleastbasal)%
-                . exists n,n' : Nat. @Su1 ( cur_flow(t) = n /\ <Res> cur_flow(t) = n' /\ not n > n' ) %implied %(afterSus)%
+                . exists n,n' : Nat. @Su1 ( cur_flow(t) = n /\ <Res> cur_flow(t) = n' /\ n' >= n ) %implied %(afterSus)%
                 . forall n : Nat . @Su1 cur_flow(t) = n => cur_flow(t) >= n %implied %(theflowistheleastpossible)%
+                . (Here Bn \/ Here BnBo) => cur_flow(t) >= basal(t) %(helper2)%
+                . (Here Bt \/ Here BtBo) => cur_flow(t) >= tbasal(t) %(helper2a)%
                 . @BnBo cur_flow(t) >= basal(t) %implied %(helper3)%
                 . @Bt cur_flow(t) >= tbasal(t) %implied %(helper4)%
                 . @BtBo cur_flow(t) >= tbasal(t) %implied %(helper5)%
                 . not (Here Su1 \/ Here Su2) => cur_flow(t) >= basal(t) \/ cur_flow(t) >= tbasal(t) %implied %(mustbeworking)%
+                . not ( cur_flow(t) = basal(t) ) => not (Here Bn) %implied %(contradiction)%
+
+        . (forall t : Nat . ext_bolus(t) = 0) => @Bn cur_flow(t) = basal(t) /\ @BnBo cur_flow(t) = basal(t) %implied %(helper6)% 
+        . (forall t : Nat . ext_bolus(t) = 0) => 
+                (forall t : Nat . exists n : Nat . @Bn cur_flow(t) = n /\ @BnBo cur_flow(t) = n) %implied %(states_same_flow)%
+
+
+        . forall t : Nat . exists n,n' : Nat . @Bn cur_flow(t) = n /\ @BnBo cur_flow(t) = n' /\ n' >= n %implied %(curflow_betw_states)% 
+        
 end
 
-spec IIP_low_Alarm =
+spec IIP_lowPar =
+        
+        HNat then
+        IIP_low_KripkeF then
+        
 
-        IIP_low then
+        ops 
+                  cur_flow : Nat -> Nat;
+                  basal : Nat ->? Nat; 
+                  tbasal : Nat ->? Nat;
+                  ext_bolus : Nat ->? Nat;
+          
 
-        rigid ops
-         
-                  low_thres : Nat  %% low limit of the deposit
-                  alarm : Nat -> Nat %% The alarm period along time. If 0 the alarm is off
-                  res : Nat -> Nat %% reservoir sensor along time
-                  max_timeS : Nat %% The maximum time, that the pump can be in a suspended state 
+        %% presentation the axioms of defininig partiality
+        forall t : Nat
+                    . Here BnBo => basal(t) =e= basal(t) /\ ext_bolus(t) =e= ext_bolus(t) 
+                    . Here BtBo => tbasal(t) =e= tbasal(t) /\ ext_bolus(t) =e= ext_bolus(t)  
+                    . not (Here BnBo \/ Here BtBo) => not ext_bolus(t) =e= ext_bolus(t)
+                    . (Here Bn) => (basal(t) =e= basal(t))
+                    . (Here Bt) => (tbasal(t) =e= tbasal(t))
+                    . not (Here Bn \/ Here BnBo) => not (basal(t) =e= basal(t))
+                    . not (Here Bt \/ Here BtBo) => not (tbasal(t) =e= tbasal(t))               
+        
 
-        %% when the insulin reservoir is low, a periodic alarm should be sound nº4
-        %% This axiom assumes that the alarm triggers in the same instant, that the low_threshold is detected
-        . forall t : Nat . (res (t) < low_thres => alarm(t) > 0) 
+          %% applying existential rigidification manually 
+        forall t : Nat 
+                  . exists n : Nat . @Bn basal(t) = n /\ @BnBo basal(t) = n
+                  . exists n : Nat . @BnBo ext_bolus(t) = n /\ @BtBo ext_bolus(t) = n
+                  . exists n : Nat . @Bt tbasal(t) = n /\ @BtBo tbasal(t) = n
 
-        %% If the pump is more than x minutes in the suspended state, a periodic alarm should be sounded nº11
-        . forall t : Nat . 
-                 (exists t1,t2 : Nat . (t2 - t1 >= max_timeS) /\ (t >= t1 /\ t <= t2) /\ 
-                          forall t' : Nat . (t' >= t1 /\ t' <= t2) => cur_flow(t') = 0) => alarm(t) > 0
 
-        end
+          %% characterising the cur_flow
+          forall t : Nat 
+                    . not ext_bolus(t) =e= ext_bolus(t) /\ def(basal(t)) => cur_flow(t) = basal(t) 
+                    . not (ext_bolus(t) =e= ext_bolus(t)) /\ def(tbasal(t)) => cur_flow(t) = tbasal(t)
+                    . def(basal(t)) /\ def(ext_bolus(t)) => cur_flow(t) = basal(t) + ext_bolus(t) 
+                    . def(tbasal(t)) /\ def(ext_bolus(t)) => cur_flow(t) = tbasal(t) + ext_bolus(t)
+
+
+        %% properties to prove
+          . forall t : Nat . def(ext_bolus(t)) => ext_bolus(t) > 0       
+          . not (forall t : Nat . cur_flow(t) =e= basal(t)) <=> not (Here Bn) %implied %(state equiv)%  
+          . forall t : Nat . basal(t) =e= basal(t) <=> (Here Bn \/ Here BnBo) %implied %(state equiv2)%
+          . (Here Bn /\ Here Bt) %implied %(incon)%
+          . forall t : Nat . not (ext_bolus(t) =e= ext_bolus(t)) /\ def(basal(t)) <=> Here Bn %implied %(test)%      
+
+end
