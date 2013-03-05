@@ -212,7 +212,7 @@ alpha a s b = case (a,b) of
                  (w,BoxOrDiamond True m f _) -> trBox w m s f
                  (w,BoxOrDiamond False m f _) -> trForm w s $ toBox m f 
                  (_,At (Simple_nom n) f _) -> trForm (AtM n) s f
-                 (w,Bind n f _) -> trBinder w n s f 
+                 (w,Univ n f _) -> trForall w n s f 
             where z = mkNeg . ExtFORMULA
                   toBox m f = z $ BoxOrDiamond True m (mkNeg f) nullRange 
                   
@@ -231,7 +231,7 @@ trBox m (Simple_mod m') s f = quant $ mkImpl prd $ trForm (QtM v) ss f
                                t = Pred_type [worldSort,worldSort] nullRange
 trBox _ _ _ _ = True_atom nullRange   
 
--- Function that takes care of the formulas with the local binder
+-- Function that takes care of the formulas with the local binder (deprecated)
 trBinder :: Mode -> NOMINAL -> [String] -> HForm -> CForm 
 trBinder w n s f = quant $ mkConj [f1,f2]
                         where
@@ -243,6 +243,16 @@ trBinder w n s f = quant $ mkConj [f1,f2]
                         var = mkVarDecl (extId n) worldSort
                         mkConj l = Conjunction l nullRange 
                         extId (Simple_nom x) = x 
+
+-- translation function for the quantification of nominals case
+trForall :: Mode -> NOMINAL -> [String] -> HForm -> CForm 
+trForall w n s f = mkForall x f' where 
+                x = return $ mkVarDecl (extId n) worldSort
+                f' = trForm w (toStr n : s) f
+                toStr = show . extId
+                extId = \(Simple_nom a) -> a
+
+
 
 -- Function that translates a list of hybrid terms to casl terms
 trTerms :: Mode -> [String] -> [TERM H_FORMULA] -> [TERM ()]

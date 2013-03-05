@@ -56,7 +56,7 @@ hybridFormula =
         a <- asKey exMark
         n <- nominal
         f <- primFormula hybrid_reserved_words
-        return (Bind n f $ toRange a [] a)
+        return (Univ n f $ toRange a [] a)
         <|>
         do
         o <- oBracketT

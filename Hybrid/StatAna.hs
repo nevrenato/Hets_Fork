@@ -40,7 +40,7 @@ import Data.List as List
 instance TermExtension H_FORMULA where
         freeVarsOfExt sign (BoxOrDiamond _ _ f _) = freeVars sign f
         freeVarsOfExt sign (At _ f _ ) = freeVars sign f
-        freeVarsOfExt sign (Bind _ f _) = freeVars sign f
+        freeVarsOfExt sign (Univ _ f _) = freeVars sign f
         freeVarsOfExt _ (Here _ _ ) = Set.empty 
 
 basicHybridAnalysis
@@ -76,7 +76,7 @@ mapH_FORMULA :: H_FORMULA -> H_FORMULA
 mapH_FORMULA (BoxOrDiamond b m f ps) =
     BoxOrDiamond b (mapMODALITY m) (mapFormula mapH_FORMULA f) ps
 mapH_FORMULA (At n f ps) = At n (mapFormula mapH_FORMULA f) ps
-mapH_FORMULA (Bind n f ps) = Bind n (mapFormula mapH_FORMULA f) ps
+mapH_FORMULA (Univ n f ps) = Univ n (mapFormula mapH_FORMULA f) ps
 mapH_FORMULA (Here n ps) = (Here n ps)
 
 resolveMODALITY :: MixResolve MODALITY
@@ -94,9 +94,9 @@ resolveH_FORMULA ga ids cf = case cf of
    At n f ps -> do
        nf <- resolveMixFrm mapH_FORMULA resolveH_FORMULA ga ids f
        return (At n nf ps)
-   Bind n f ps -> do
+   Univ n f ps -> do
        nf <- resolveMixFrm mapH_FORMULA resolveH_FORMULA ga ids f
-       return (Bind n nf ps)
+       return (Univ n nf ps)
    Here n ps -> return (Here n ps)
 
 minExpForm :: Min H_FORMULA HybridSign 
@@ -138,7 +138,7 @@ minExpForm s form =
                                 then Result [mkDiag Error "collision on nominals" n]
                                             $ Just (Simple_nom n)
                                 else return (Simple_nom n)
-        addBind (Simple_nom n) = addNomId [] n
+        addUniv (Simple_nom n) = addNomId [] n
     in case form of
         BoxOrDiamond b m f ps ->
             do nm <- minMod m ps
@@ -148,13 +148,13 @@ minExpForm s form =
             do nn <- minNom n
                nf <- minExpFORMULA minExpForm s f 
                return (At nn nf ps)
-        Bind n f ps ->
+        Univ n f ps ->
             do nn <- colNom n
                -- add the binder in the sign (for this formula only)
                -- so it can be used a normal nominal
-               bs <- addBind nn (extendedInfo s) 
+               bs <- addUniv nn (extendedInfo s) 
                nf <- minExpFORMULA minExpForm (s {extendedInfo = bs}) f 
-               return (Bind nn nf ps)
+               return (Univ nn nf ps)
         Here n ps ->
             do nn <- minNom n 
                return (Here nn ps)
@@ -289,7 +289,7 @@ getFormPredToks frm = case frm of
     Mixfix_formula t -> getTermPredToks t
     ExtFORMULA (BoxOrDiamond _ _ f _) -> getFormPredToks f
     ExtFORMULA (At _ f _ ) -> getFormPredToks f
-    ExtFORMULA (Bind _ f _ ) -> getFormPredToks f
+    ExtFORMULA (Univ _ f _ ) -> getFormPredToks f
     Predication _ ts _ -> Set.unions $ map getTermPredToks ts
     Definedness t _ -> getTermPredToks t
     Existl_equation t1 t2 _ ->
