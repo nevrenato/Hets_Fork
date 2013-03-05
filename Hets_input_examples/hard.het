@@ -1,0 +1,14 @@
+logic Hybrid
+spec X = 
+        modalities m
+        preds p : ()
+
+%% this is equivalent to the negation of A (down x <m> not x), which cant be
+%solved with htab.
+%% we need to negate the sentence, because theorem provers negate it also.
+%Hence, because it is already negated, the posterior negation will nullify the
+%former,i.e., not not f = f, and so we have the equivalent formula of the above
+%being tested in theorem provers. 
+. not (!y not (!x not (@y Here x /\ @y <m> not Here x))) %implied
+
+end
