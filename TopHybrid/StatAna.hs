@@ -97,12 +97,23 @@ unroll l bs s'@(Sgn_Wrap _ s) f =
                   (BiImplication f' f'') -> (liftM2 BiImplication) (unroll l bs s' f') (unroll l bs s' f'')
                   (Here n) -> nomOrModCheck (nomies s) n $ Here n 
                   (Neg f') -> (liftM Neg) (unroll l bs s' f')
+                  (Uni n f') -> (liftM $ Uni n) (unroll l bs (addNomToSig n s') f') >>= checkForRepNom n (nomies s)
                   (UnderLogic f') -> (undFormAna l (extended s) f' bs) >>= (return . UnderLogic)
                   (Par f') -> (liftM Par) (unroll l bs s' f')
                   TrueA -> return TrueA
                   FalseA -> return FalseA
 unroll _ _ EmptySign _ = error "Signature not computable"
- 
+
+-- helper function
+addNomToSig :: NOMINAL -> Sgn_Wrap -> Sgn_Wrap
+addNomToSig n (Sgn_Wrap l s) = Sgn_Wrap l s { nomies = Data.Set.insert n $ nomies s}  
+addNomToSig _ EmptySign = error "Signature not computable"
+
+checkForRepNom :: (Pretty f, GetRange f) => 
+        NOMINAL -> Set NOMINAL -> (TH_FORMULA f) -> Result (TH_FORMULA f)
+checkForRepNom n s = if member n s 
+        then mkError "conflict in nominal decl and quantification"  
+        else return 
 -- | Lift of the formula analyser
 -- Analyses each formula and collects the results. Converting also the
 -- annotations to the correct format. The function flipM is needed because

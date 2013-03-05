@@ -52,12 +52,12 @@ callParser = fromMaybe (error "Failed! No parser for this logic")
 itemParser :: AParser st TH_BASIC_ITEM
 itemParser = 
         do 
-        asKey "modality"
+        asKey "modalities"
         ms <- ids
         return $ Simple_mod_decl ms 
         <|>
         do 
-        asKey "nominal"
+        asKey "nominals"
         ns <- ids
         return $ Simple_nom_decl ns 
         where ids = sepBy simpleId anSemiOrComma
@@ -96,7 +96,7 @@ disjP :: AParser st ((TH_FORMULA f) -> (TH_FORMULA f) -> (TH_FORMULA f))
 disjP = asKey "\\/" >> return Disjunction
 
 impAndBiP :: AParser st ((TH_FORMULA f) -> (TH_FORMULA f) -> (TH_FORMULA f))
-impAndBiP = (asKey "->" >> return Implication) <|> (asKey "<->" >> return BiImplication)
+impAndBiP = (asKey "=>" >> return Implication) <|> (asKey "<=>" >> return BiImplication)
 --------------
 
 -- Parser of sentences without the binary operators
@@ -119,6 +119,12 @@ fParser l bs =
         n <- simpleId
         f <- (fParser l bs <|> topParser l bs)
         return $ At n f 
+        <|>
+        do 
+        asKey "!"
+        n <- simpleId
+        f <- fParser l bs
+        return $ Uni n f
         <|>
         do 
         asKey "["

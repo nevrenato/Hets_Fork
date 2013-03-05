@@ -39,6 +39,7 @@ type NOMINAL = SIMPLE_ID
 -- The strucuture of an hybridized sentence, where f correponds to the 
 -- underlying logic
 data TH_FORMULA f = At NOMINAL (TH_FORMULA f) 
+                  | Uni NOMINAL (TH_FORMULA f)
                   | Box MODALITY (TH_FORMULA f) 
                   | Dia MODALITY (TH_FORMULA f) 
                   | UnderLogic f

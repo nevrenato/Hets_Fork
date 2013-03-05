@@ -39,6 +39,7 @@ type NOMINAL = SIMPLE_ID
 -- The strucuture of an hybridized sentence, where f correponds to the 
 -- underlying logic
 data TH_FORMULA f = At NOMINAL (TH_FORMULA f) 
+                  | Uni NOMINAL (TH_FORMULA f)
                   | Box MODALITY (TH_FORMULA f) 
                   | Dia MODALITY (TH_FORMULA f) 
                   | UnderLogic f
@@ -127,6 +128,7 @@ instance GetRange f => GetRange (TH_FORMULA f) where
   getRange = const nullRange
   rangeSpan x = case x of
     At a b -> joinRanges [rangeSpan a, rangeSpan b]
+    Uni a b -> joinRanges [rangeSpan a, rangeSpan b]
     Box a b -> joinRanges [rangeSpan a, rangeSpan b]
     Dia a b -> joinRanges [rangeSpan a, rangeSpan b]
     UnderLogic a -> joinRanges [rangeSpan a]
