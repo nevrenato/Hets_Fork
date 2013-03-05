@@ -9,6 +9,9 @@ spec X =
 %Hence, because it is already negated, the posterior negation will nullify the
 %former,i.e., not not f = f, and so we have the equivalent formula of the above
 %being tested in theorem provers. 
-. not (!y not (!x not (@y Here x /\ @y <m> not Here x))) %implied
+. not (!y not (!x not (@y Here x /\ @y <m> not Here x))) %implied %(ex2)%
+
+%% same of above, this time the formula is A (down x <m> (not x /\ <m> x))
+. not ! y not (! x not (@y Here x /\ @y <m> (not Here x /\ <m> Here x))) %implied %(ex1)%
 
 end
