@@ -47,5 +47,6 @@ data NOMINAL = Simple_nom SIMPLE_ID
 data H_FORMULA =  At NOMINAL (FORMULA H_FORMULA) Range 
                 | BoxOrDiamond Bool MODALITY (FORMULA H_FORMULA) Range 
                 | Here NOMINAL Range 
-                | Univ NOMINAL (FORMULA H_FORMULA) Range 
+                | Univ NOMINAL (FORMULA H_FORMULA) Range
+                | Exist NOMINAL (FORMULA H_FORMULA) Range 
              deriving (Eq, Ord, Show)

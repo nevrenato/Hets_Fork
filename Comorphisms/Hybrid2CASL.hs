@@ -212,7 +212,8 @@ alpha a s b = case (a,b) of
                  (w,BoxOrDiamond True m f _) -> trBox w m s f
                  (w,BoxOrDiamond False m f _) -> trForm w s $ toBox m f 
                  (_,At (Simple_nom n) f _) -> trForm (AtM n) s f
-                 (w,Univ n f _) -> trForall w n s f 
+                 (w,Univ n f _) -> trForall w n s f
+                 (w,Exist n f _) -> mkNeg $ trForall w n s (mkNeg f) 
             where z = mkNeg . ExtFORMULA
                   toBox m f = z $ BoxOrDiamond True m (mkNeg f) nullRange 
                   

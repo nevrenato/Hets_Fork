@@ -70,6 +70,10 @@ instance ShATermConvertible f => ShATermConvertible (TH_FORMULA f) where
       (att1, a') <- toShATerm' att0 a
       (att2, b') <- toShATerm' att1 b
       return $ addATerm (ShAAppl "Uni" [a', b'] []) att2
+    Exist a b -> do
+      (att1, a') <- toShATerm' att0 a
+      (att2, b') <- toShATerm' att1 b
+      return $ addATerm (ShAAppl "Exist" [a', b'] []) att2
     Box a b -> do
       (att1, a') <- toShATerm' att0 a
       (att2, b') <- toShATerm' att1 b
@@ -121,6 +125,12 @@ instance ShATermConvertible f => ShATermConvertible (TH_FORMULA f) where
       case fromShATerm' b att1 of
       { (att2, b') ->
       (att2, Uni a' b') }}
+    ShAAppl "Exist" [a, b] _ ->
+      case fromShATerm' a att0 of
+      { (att1, a') ->
+      case fromShATerm' b att1 of
+      { (att2, b') ->
+      (att2, Exist a' b') }}
     ShAAppl "Box" [a, b] _ ->
       case fromShATerm' a att0 of
       { (att1, a') ->

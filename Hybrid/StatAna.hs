@@ -41,6 +41,7 @@ instance TermExtension H_FORMULA where
         freeVarsOfExt sign (BoxOrDiamond _ _ f _) = freeVars sign f
         freeVarsOfExt sign (At _ f _ ) = freeVars sign f
         freeVarsOfExt sign (Univ _ f _) = freeVars sign f
+        freeVarsOfExt sign (Exist _ f _) = freeVars sign f
         freeVarsOfExt _ (Here _ _ ) = Set.empty 
 
 basicHybridAnalysis
@@ -77,6 +78,7 @@ mapH_FORMULA (BoxOrDiamond b m f ps) =
     BoxOrDiamond b (mapMODALITY m) (mapFormula mapH_FORMULA f) ps
 mapH_FORMULA (At n f ps) = At n (mapFormula mapH_FORMULA f) ps
 mapH_FORMULA (Univ n f ps) = Univ n (mapFormula mapH_FORMULA f) ps
+mapH_FORMULA (Exist n f ps) = Exist n (mapFormula mapH_FORMULA f) ps
 mapH_FORMULA (Here n ps) = (Here n ps)
 
 resolveMODALITY :: MixResolve MODALITY
@@ -97,6 +99,9 @@ resolveH_FORMULA ga ids cf = case cf of
    Univ n f ps -> do
        nf <- resolveMixFrm mapH_FORMULA resolveH_FORMULA ga ids f
        return (Univ n nf ps)
+   Exist n f ps -> do
+       nf <- resolveMixFrm mapH_FORMULA resolveH_FORMULA ga ids f
+       return (Exist n nf ps)
    Here n ps -> return (Here n ps)
 
 minExpForm :: Min H_FORMULA HybridSign 
@@ -139,6 +144,7 @@ minExpForm s form =
                                             $ Just (Simple_nom n)
                                 else return (Simple_nom n)
         addUniv (Simple_nom n) = addNomId [] n
+        addExist (Simple_nom n ) = addNomId [] n
     in case form of
         BoxOrDiamond b m f ps ->
             do nm <- minMod m ps
@@ -154,7 +160,15 @@ minExpForm s form =
                -- so it can be used a normal nominal
                bs <- addUniv nn (extendedInfo s) 
                nf <- minExpFORMULA minExpForm (s {extendedInfo = bs}) f 
-               return (Univ nn nf ps)
+               return (Univ nn nf ps) 
+        Exist n f ps ->
+            do nn <- colNom n
+               -- add the binder in the sign (for this formula only)
+               -- so it can be used a normal nominal
+               bs <- addExist nn (extendedInfo s) 
+               nf <- minExpFORMULA minExpForm (s {extendedInfo = bs}) f 
+               return (Exist nn nf ps)
+
         Here n ps ->
             do nn <- minNom n 
                return (Here nn ps)
@@ -290,6 +304,7 @@ getFormPredToks frm = case frm of
     ExtFORMULA (BoxOrDiamond _ _ f _) -> getFormPredToks f
     ExtFORMULA (At _ f _ ) -> getFormPredToks f
     ExtFORMULA (Univ _ f _ ) -> getFormPredToks f
+    ExtFORMULA (Exist _ f _ ) -> getFormPredToks f
     Predication _ ts _ -> Set.unions $ map getTermPredToks ts
     Definedness t _ -> getTermPredToks t
     Existl_equation t1 t2 _ ->

@@ -98,6 +98,7 @@ unroll l bs s'@(Sgn_Wrap _ s) f =
                   (Here n) -> nomOrModCheck (nomies s) n $ Here n 
                   (Neg f') -> (liftM Neg) (unroll l bs s' f')
                   (Uni n f') -> (liftM $ Uni n) (unroll l bs (addNomToSig n s') f') >>= checkForRepNom n (nomies s)
+                  (Exist n f') -> (liftM $ Exist n) (unroll l bs (addNomToSig n s') f') >>= checkForRepNom n (nomies s)
                   (UnderLogic f') -> (undFormAna l (extended s) f' bs) >>= (return . UnderLogic)
                   (Par f') -> (liftM Par) (unroll l bs s' f')
                   TrueA -> return TrueA

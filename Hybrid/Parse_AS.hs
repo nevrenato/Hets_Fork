@@ -59,6 +59,12 @@ hybridFormula =
         return (Univ n f $ toRange a [] a)
         <|>
         do
+        a <- asKey "?"
+        n <- nominal
+        f <- primFormula hybrid_reserved_words
+        return (Exist n f $ toRange a [] a)
+        <|>
+        do
         o <- oBracketT
         m <- modality [] 
         c <- cBracketT

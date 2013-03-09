@@ -127,6 +127,12 @@ fParser l bs =
         return $ Uni n f
         <|>
         do 
+        asKey "?"
+        n <- simpleId
+        f <- fParser l bs
+        return $ Exist n f
+        <|>
+        do 
         asKey "["
         m <- simpleId
         asKey "]"

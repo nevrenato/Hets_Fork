@@ -72,7 +72,11 @@ instance Pretty H_FORMULA where
     pretty (Univ n f _) =
         let sp = (<+>)
             td = pretty n
-        in sep $ (prettyBind `sp` td) : [condParensInnerF printFormula parens f]  
+        in sep $ (prettyUniv `sp` td) : [condParensInnerF printFormula parens f]  
+    pretty (Exist n f _) =
+        let sp = (<+>)
+            td = pretty n
+        in sep $ (prettyExist `sp` td) : [condParensInnerF printFormula parens f]  
     pretty (Here n _) = 
         let sp = (<+>)
             td = pretty n

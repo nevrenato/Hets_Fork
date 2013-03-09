@@ -33,6 +33,7 @@ printFormula (Frm_Wrap l f) = case f of
 instance (Pretty f) => Pretty (TH_FORMULA f) where
         pretty (At n f) = keyword "@" <+> (pretty n) <+> (pretty f)
         pretty (Uni n f) = keyword "forall worlds" <+> (pretty n) <+> (pretty f)  
+        pretty (Exist n f) = keyword "exist world" <+> (pretty n) <+> (pretty f)  
         pretty (UnderLogic f) = keyword "{" <+> (pretty f) <+> (keyword "}") 
         pretty (Box m f) = keyword "[" <> (pretty m) <> keyword "]" <+> (pretty f) 
         pretty (Dia m f) = keyword "<" <> (pretty m) <> keyword ">" <+> (pretty f) 

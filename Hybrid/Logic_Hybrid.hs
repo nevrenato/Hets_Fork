@@ -58,6 +58,7 @@ map_H_FORMULA mor (BoxOrDiamond b m f ps) =
    in BoxOrDiamond b newM newF ps
 map_H_FORMULA mor (At n f ps) = At n (mapSen map_H_FORMULA mor f) ps
 map_H_FORMULA mor (Univ n f ps) = Univ n (mapSen map_H_FORMULA mor f) ps
+map_H_FORMULA mor (Exist n f ps) = Exist n (mapSen map_H_FORMULA mor f) ps
 map_H_FORMULA _ (Here n ps) = Here n ps
 
 instance Sentences Hybrid HybridFORMULA HSign HybridMor Symbol where
@@ -81,6 +82,9 @@ simHybrid sign (At n f ps) =
         At n (simplifySen minExpForm simHybrid sign f) ps
 simHybrid sign (Univ n f ps) =
         Univ n (simplifySen minExpForm simHybrid sign f) ps
+simHybrid sign (Exist n f ps) =
+        Exist n (simplifySen minExpForm simHybrid sign f) ps
+
 simHybrid _ (Here n ps) = Here n ps
 
 rmTypesExt :: a -> b -> b

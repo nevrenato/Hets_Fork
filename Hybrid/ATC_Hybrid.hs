@@ -82,6 +82,11 @@ instance ShATermConvertible H_FORMULA where
       (att2, b') <- toShATerm' att1 b
       (att3, c') <- toShATerm' att2 c
       return $ addATerm (ShAAppl "Univ" [a', b', c'] []) att3
+    Exist a b c -> do
+      (att1, a') <- toShATerm' att0 a
+      (att2, b') <- toShATerm' att1 b
+      (att3, c') <- toShATerm' att2 c
+      return $ addATerm (ShAAppl "Exist" [a', b', c'] []) att3
   fromShATermAux ix att0 = case getShATerm ix att0 of
     ShAAppl "At" [a, b, c] _ ->
       case fromShATerm' a att0 of
@@ -115,6 +120,14 @@ instance ShATermConvertible H_FORMULA where
       case fromShATerm' c att2 of
       { (att3, c') ->
       (att3, Univ a' b' c') }}}
+    ShAAppl "Exist" [a, b, c] _ ->
+      case fromShATerm' a att0 of
+      { (att1, a') ->
+      case fromShATerm' b att1 of
+      { (att2, b') ->
+      case fromShATerm' c att2 of
+      { (att3, c') ->
+      (att3, Exist a' b' c') }}}
     u -> fromShATermError "H_FORMULA" u
 
 instance ShATermConvertible NOMINAL where

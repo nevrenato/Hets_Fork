@@ -40,6 +40,7 @@ type NOMINAL = SIMPLE_ID
 -- underlying logic
 data TH_FORMULA f = At NOMINAL (TH_FORMULA f) 
                   | Uni NOMINAL (TH_FORMULA f)
+                  | Exist NOMINAL (TH_FORMULA f)
                   | Box MODALITY (TH_FORMULA f) 
                   | Dia MODALITY (TH_FORMULA f) 
                   | UnderLogic f
@@ -129,6 +130,7 @@ instance GetRange f => GetRange (TH_FORMULA f) where
   rangeSpan x = case x of
     At a b -> joinRanges [rangeSpan a, rangeSpan b]
     Uni a b -> joinRanges [rangeSpan a, rangeSpan b]
+    Exist a b -> joinRanges [rangeSpan a, rangeSpan b]
     Box a b -> joinRanges [rangeSpan a, rangeSpan b]
     Dia a b -> joinRanges [rangeSpan a, rangeSpan b]
     UnderLogic a -> joinRanges [rangeSpan a]
