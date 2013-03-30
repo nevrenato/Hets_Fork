@@ -142,6 +142,8 @@ minExpForm s form =
         colNom (Simple_nom n) = if Map.member n (nomies $ extendedInfo s)
                                 then Result [mkDiag Error "collision on nominals" n]
                                             $ Just (Simple_nom n)
+                                else if wPrefix n then  
+                                Result [mkDiag Error "\"world\" prefixes are reserved" n] Nothing                                                              
                                 else return (Simple_nom n)
         addUniv (Simple_nom n) = addNomId [] n
         addExist (Simple_nom n ) = addNomId [] n
@@ -238,7 +240,11 @@ preAddNomId i hs =
     let ns = nomies hs in
     if Map.member i ns then
         Result [mkDiag Hint "repeated nominal" i] $ Just hs
-        else return hs { nomies = Map.insert i [] ns }
+        else if wPrefix i 
+                then 
+                Result [mkDiag Error "\"world\" prefixes are reserved" i] Nothing
+                else 
+                return hs { nomies = Map.insert i [] ns }
 
 preAddModId :: SIMPLE_ID -> HybridSign -> Result HybridSign
 preAddModId i m =
@@ -326,3 +332,8 @@ getTermPredToks trm = case trm of
     Mixfix_bracketed ts _ -> Set.unions $ map getTermPredToks ts
     Mixfix_braced ts _ -> Set.unions $ map getTermPredToks ts
     _ -> Set.empty
+
+
+
+wPrefix :: Token -> Bool
+wPrefix = (isPrefixOf "world").tokStr

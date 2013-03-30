@@ -175,7 +175,7 @@ transSens hs cs = let
 
 -- Translates an HybridCASL formula to CASL formula
 trans :: HForm -> CForm
-trans = let w = mkSimpleId "w"
+trans = let w = mkSimpleId "world"
             vars = mkVarDecl w worldSort
                 in (mkForall [vars]) . trForm (QtM w) []
 
@@ -299,7 +299,7 @@ mkArg a l = case a of
 
 -- Create a new variable name new in the formula
 newVarName :: [String] -> [String]
-newVarName xs = ("v" ++) (show $ length xs) : xs 
+newVarName xs = ("world" ++) (show $ length xs) : xs 
 
 -- | Auxiliar datatype to determine wich is the argument of alpha
 -- | Quantified Mode or At mode
