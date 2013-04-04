@@ -39,11 +39,11 @@ spec HNat =
         . a < b /\ b < c => a < b
         . a < b <=> exists d : Nat . not d = 0 /\ a + d = b 
         
-        . a < suc(a)  %(sucBigger)% %%proved with eprover 
-        . a < b => (a + c) < (b + c) %%(sumAlwaysAdds)% %%can be proved in CASL
-        . a < b => a < b + c %(sumAlwaysAdds2nd)% %%can be proved in CASL
-        . a + c < b => a < b %(sumAlwaysAdds3rd)% %%can be proved in CASL
-        . not a = 0 => 0 < a  %(0isthelowestNat)% %%can be proved here
+        . a < suc(a)  %(sucBigger)% 
+        . a < b => (a + c) < (b + c) %%(sumAlwaysAdds)%
+        . a < b => a < b + c %(sumAlwaysAdds2nd)% 
+        . a + c < b => a < b %(sumAlwaysAdds3rd)%
+        . not a = 0 => 0 < a  %(0isthelowestNat)%
 
 
         rigid pred __ > __ : Nat*Nat
