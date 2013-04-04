@@ -1,12 +1,12 @@
 logic Hybrid
 
-%% 66 Page, Brauner book 
+%% Page 66, Brauner's book on proof theory 
 %% some axioms
 
 spec Dist1 =
 	preds p,q : ()
 	modality M  
-	. [M] (p /\ q) => ([M]p /\ [M]q) %(Dist1)% %implied
+	. [M] (p /\ q) => ([M]p /\ [M]q) %implied
 end
 
 spec Test =

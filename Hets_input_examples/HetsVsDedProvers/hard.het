@@ -1,6 +1,6 @@
 logic Hybrid
 
-%% Harder formulas 
+%% Hard formulas 
 
 spec aux =
 	modality M 
@@ -23,11 +23,5 @@ spec f2 =
 	(r => q)) /\ ((p => ((t => ([M](p => t))) /\ ((not t) => ([M](p => (not t)))))) /\ (q => ((s => 
 	([M](p => t))) /\ ((not t) => ([M](p => (not t)))))))) /\ ((p /\ (not q)) => (( <M> ((q /\ (not r)) /\ p))
 	/\ ( <M> ((q /\ (not r)) /\ (not s)))))))))) \/ (not ( [M] s)) %implied
-
-
-spec f3 = 
-	aux then
-	. ! X  [M] [M] ( ! Y @X <M> (Here Y) ) /\ [M] <M> true /\ <M> true  %implied
-end
 
 

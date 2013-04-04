@@ -1,6 +1,0 @@
-spec Test =
-        sorts State
-        preds p : State
-        ops n : State
-
-        . p(n) <=> forall w : State . w = n => p(w) %implied 

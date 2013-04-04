@@ -1,7 +1,0 @@
-logic CASL
-
-spec X =
-        pred p : ()
-        pred q : () 
-        . p /\ q
-        . p /\ q => p %implied
